@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2016 Piotrek.
+ * Copyright 2016 Piotr Tekieli <p.s.tekieli@student.tudelft.nl>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.tudelft.wdm.imdb.postgres;
+package org.tudelft.wdm.imdb.pgcontrollers;
 
 import java.sql.Statement;
 import java.sql.Connection;
@@ -30,32 +30,35 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.tudelft.wdm.imdb.controllers.MovieController;
 
 /**
  *
- * @author Piotrek
- */
-public class JDBC {
+ * @author Piotr Tekieli <p.s.tekieli@student.tudelft.nl>
+ * @version v0.1 (15.05.2016)
+ * @version v0.2 (18.05.2016)
+ * @version v0.3s (19.05.2016)
+ * 
+ **/
+public class JDBC {   
     
-    Connection con = null;
-    Statement st = null;
-    public ResultSet rs = null;
+    private static Connection con = null;
+    private static Statement st = null;
+    private static ResultSet rs = null;
    
-    String url = "jdbc:postgresql://localhost/imdb";
-    String user = "postgres";
-    String password = "ZAQ!2wsx";    
+    private static final String URL = "jdbc:postgresql://localhost/imdb";
+    private static final String USER = "postgres";
+    private static final String PASSWORD = "ZAQ!2wsx";    
     
-    public void EstablishConnection() throws ClassNotFoundException {    
-        try {
+    private static void EstablishConnection() throws ClassNotFoundException {    
+        try {            
             Class.forName("org.postgresql.Driver");
-            con = DriverManager.getConnection(url, user, password);                 
+            con = DriverManager.getConnection(URL, USER, PASSWORD);                 
         } catch (SQLException ex) {
             Logger.getLogger(MovieController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
-    public void CloseConnection() {
+    public static void CloseConnection() {
         try {
             if (rs != null) {
                 rs.close();
@@ -71,13 +74,17 @@ public class JDBC {
         }    
     }
     
-    public ResultSet PerformQuery(String Query) {
+    public static void PerformQuery(String Query) {
         try {    
+            EstablishConnection();
             st = con.createStatement();
             rs = st.executeQuery(Query);               
-        } catch (SQLException ex) {
+        } catch (SQLException | ClassNotFoundException ex) {
             Logger.getLogger(MovieController.class.getName()).log(Level.SEVERE, null, ex);
-        } 
+        }         
+    }
+    
+    public static ResultSet getResultSet() {
         return rs;
     }
 }

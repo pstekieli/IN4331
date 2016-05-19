@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2016 Piotrek.
+ * Copyright 2016 Piotr Tekieli <p.s.tekieli@student.tudelft.nl>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,18 +28,18 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @author Piotrek
- */
-@XmlRootElement
+ * @author Piotr Tekieli <p.s.tekieli@student.tudelft.nl>
+ * @version v0.1 (15.05.2016)
+ * @version v0.2 (18.05.2016)
+ * @version v0.3s (19.05.2016)
+ * 
+ **/
+@XmlRootElement (name = "Genre")
 public class Genre {
-    @XmlElement
-    private long idGenre;
-    @XmlElement
-    private String Label;    
-    
-    public Genre() {
-        
-    }
+    @XmlElement (name = "Genre ID")
+    private final long idGenre;
+    @XmlElement (name = "Name")
+    private final String Label;    
     
     public Genre(long idGenre, String Label) {
         this.Label = Label;

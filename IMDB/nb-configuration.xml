@@ -18,5 +18,6 @@ Any value defined here will override the pom.xml file value but is only applicab
         <netbeans.hint.license>mit</netbeans.hint.license>
         <org-netbeans-modules-javascript2-requirejs.enabled>true</org-netbeans-modules-javascript2-requirejs.enabled>
         <org-netbeans-modules-maven-jaxws.test_2e_client_2e_project>E:\Programowanie\Java\IMDB</org-netbeans-modules-maven-jaxws.test_2e_client_2e_project>
+        <org-netbeans-modules-whitelist.whitelist-oracle>false</org-netbeans-modules-whitelist.whitelist-oracle>
     </properties>
 </project-shared-configuration>

@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2016 Piotrek.
+ * Copyright 2016 Piotr Tekieli <p.s.tekieli@student.tudelft.nl>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,31 +23,28 @@
  */
 package org.tudelft.wdm.imdb.models;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion;
-import java.util.ArrayList;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @author Piotrek
- */
-@JsonSerialize(include = Inclusion.NON_NULL)
-
+ * @author Piotr Tekieli <p.s.tekieli@student.tudelft.nl>
+ * @version v0.1 (15.05.2016)
+ * @version v0.2 (18.05.2016)
+ * @version v0.3s (19.05.2016)
+ * 
+ **/
 @XmlRootElement (name = "Actor")
 public class Actor {
     
-    @XmlElement
+    @XmlElement (name = "Actor ID")
     private final long idActor;
-    @XmlElement
+    @XmlElement (name = "First Name")
     private final String FirstName;
-    @XmlElement
+    @XmlElement (name = "Last Name")
     private final String LastName;
-    @XmlElement
-    private final String Gender;    
-    @XmlElement (name = "Movies")
-    private ArrayList<Movie> Movies;
+    @XmlElement (name = "Gender ID")
+    private final String Gender;
        
     public Actor(long idActor, String FirstName, String LastName, String Gender) {
         this.idActor = idActor;
@@ -56,16 +53,5 @@ public class Actor {
         this.Gender = Gender;
     }
 
-    public void AddMovie(long idMovie, String Title, int Year) {
-        if (gotMovies() == null)
-            Movies = new ArrayList<>();        
-        gotMovies().add(new Movie (idMovie, Title, Year));
-    }   
     
-     /**
-     * @return the Movies
-     */
-    public ArrayList<Movie> gotMovies() {
-        return Movies;
-    }
 }

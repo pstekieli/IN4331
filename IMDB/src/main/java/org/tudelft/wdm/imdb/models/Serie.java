@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2016 Piotrek.
+ * Copyright 2016 Piotr Tekieli <p.s.tekieli@student.tudelft.nl>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,23 +28,23 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @author Piotrek
- */
-@XmlRootElement
+ * @author Piotr Tekieli <p.s.tekieli@student.tudelft.nl>
+ * @version v0.1 (15.05.2016)
+ * @version v0.2 (18.05.2016)
+ * @version v0.3s (19.05.2016)
+ * 
+ **/
+@XmlRootElement (name = "Serie")
 public class Serie {
-    @XmlElement
-    private long idSerie;
-    @XmlElement
-    private String Title;
-    @XmlElement
-    private int Season;
-    @XmlElement
-    private int Number;
+    @XmlElement (name = "Serie ID")
+    private final long idSerie;
+    @XmlElement (name = "Title")
+    private final String Title;
+    @XmlElement (name = "Season")
+    private final int Season;
+    @XmlElement (name = "Episode")
+    private final int Number;
 
-    public Serie() {
-        
-    }
-    
     public Serie(long idSerie, String Title, int Season, int Number) {
         this.idSerie = idSerie;
         this.Title = Title;

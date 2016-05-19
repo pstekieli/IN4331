@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2016 Piotrek.
+ * Copyright 2016 Piotr Tekieli <p.s.tekieli@student.tudelft.nl>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,97 +23,30 @@
  */
 package org.tudelft.wdm.imdb.models;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collections;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @author Piotrek
- */
-@JsonSerialize(include = Inclusion.NON_NULL)
-
+ * @author Piotr Tekieli <p.s.tekieli@student.tudelft.nl>
+ * @version v0.1 (15.05.2016)
+ * @version v0.2 (18.05.2016)
+ * @version v0.3s (19.05.2016)
+ * 
+ **/
 @XmlRootElement(name = "Movie")
 public class Movie {    
    
-    @XmlElement
+    @XmlElement (name = "Movie ID")
     private final long idMovie;      
-    @XmlElement
+    @XmlElement (name = "Title")
     private final String Title;    
-    @XmlElement
+    @XmlElement (name = "Year")
     private final int Year;    
-    @XmlElement
-    private ArrayList<Actor> Actors;    
-    @XmlElement
-    private ArrayList<Genre> Genres;    
-    @XmlElement
-    private ArrayList<Keyword> Keywords;    
-    @XmlElement
-    private ArrayList<Serie> Series; 
     
     public Movie(long idMovie, String Title, int Year) {
         this.idMovie = idMovie;
         this.Title = Title;
         this.Year = Year;       
-    }
-    
-    public void AddActor(long idActor, String FirstName, String LastName, String Gender) {
-        if (getActors() == null)
-            Actors = new ArrayList<>();
-        Actor actor = new Actor(idActor, FirstName, LastName, Gender);
-        getActors().add(actor);        
-    }
-    
-    public void AddGenre(long idGenre, String Label) {
-        if (getGenres() == null)
-            Genres = new ArrayList<>();
-        Genre genre = new Genre(idGenre, Label);
-        getGenres().add(genre);
-    }
-    
-    public void AddKeyword(long idKeyword, String Label) {
-        if (getKeywords() == null)
-            Keywords = new ArrayList<>();
-        Keyword keyword = new Keyword(idKeyword, Label);
-        getKeywords().add(keyword);
-    }
-    
-    public void AddSerie(long idSerie, String Title, int Season, int Number) {
-        if (getSeries() == null)
-            Series = new ArrayList<>();
-        Serie serie = new Serie(idSerie, Title, Season, Number);
-        getSeries().add(serie);
-    }
-
-    /**
-     * @return the Actors
-     */
-    public ArrayList<Actor> getActors() {        
-        return Actors;
-    }
-
-    /**
-     * @return the Genres
-     */
-    public ArrayList<Genre> getGenres() {
-        return Genres;
-    }
-
-    /**
-     * @return the Keywords
-     */
-    public ArrayList<Keyword> getKeywords() {
-        return Keywords;
-    }
-
-    /**
-     * @return the Series
-     */
-    public ArrayList<Serie> getSeries() {
-        return Series;
-    }
+    }    
 }
