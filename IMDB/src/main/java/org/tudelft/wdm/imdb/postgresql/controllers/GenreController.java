@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.tudelft.wdm.imdb.pgcontrollers;
+package org.tudelft.wdm.imdb.postgresql.controllers;
 
 import java.sql.SQLException;
 import java.util.ArrayList;

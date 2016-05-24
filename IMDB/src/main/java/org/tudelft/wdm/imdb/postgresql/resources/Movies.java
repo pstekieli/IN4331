@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.tudelft.wdm.imdb.pgresources;
+package org.tudelft.wdm.imdb.postgresql.resources;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -29,8 +29,9 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import org.tudelft.wdm.imdb.pgcontrollers.MovieController;
+
 import org.tudelft.wdm.imdb.models.MessageJSON;
+import org.tudelft.wdm.imdb.postgresql.controllers.MovieController;
 
 
 /**
@@ -41,7 +42,7 @@ import org.tudelft.wdm.imdb.models.MessageJSON;
  * @version v0.3s (19.05.2016)
  * 
  **/
-@Path("pg/movies")
+@Path("postgresql/movies")
 public class Movies {
 
     /**
