@@ -1,36 +1,39 @@
-/*
- * The MIT License
- *
- * Copyright 2016 Piotr Tekieli <p.s.tekieli@student.tudelft.nl>
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
 package org.tudelft.wdm.imdb.mongodb.resources;
 
+import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+
+import org.tudelft.wdm.imdb.models.MessageJSON;
+import org.tudelft.wdm.imdb.models.Movie;
+import org.tudelft.wdm.imdb.mongodb.controllers.MovieController;
 
 /**
-*
-* @author Alexander Overvoorde <A.J.D.Overvoorde@student.tudelft.nl>
-* 
-**/
+ * @author Alexander Overvoorde
+ * 
+ * Views for the MongoDB movie related APIs.
+ */
 @Path("mongodb/movies")
 public class Movies {
-	
+    /**
+     * Retrieve a single movie by its id. An empty document is returned if the
+     * id does not match any movie.
+     * 
+     * @param id Id of movie.
+     * @return Movie details or empty document.
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/id/{movieId}")
+    public MessageJSON movieById(@PathParam("movieId") String id) {
+        Movie movie = MovieController.getMovieById(Long.parseLong(id));
+
+        if (movie != null) {
+            return new MessageJSON(movie);
+        } else {
+            return new MessageJSON();
+        }
+    }
 }

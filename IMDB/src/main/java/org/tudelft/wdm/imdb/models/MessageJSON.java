@@ -58,6 +58,10 @@ public class MessageJSON {
     private ArrayList<Link> References;
     @XmlElement (name = "Number Of Movies")
     private Integer Statistic = null;
+    
+    public MessageJSON(Movie movie) {
+        AddMovie(movie);
+    }
         
     public void AddActor(long idActor, String FirstName, String LastName, String Gender) {
         if (Actors == null)
