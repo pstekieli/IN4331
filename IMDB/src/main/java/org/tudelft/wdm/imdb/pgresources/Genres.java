@@ -40,7 +40,7 @@ import org.tudelft.wdm.imdb.pgcontrollers.GenreController;
  * @version v0.3s (19.05.2016)
  * 
  **/
-@Path("genres")
+@Path("pg/genres")
 public class Genres {
 
     Long voffset = null, vlimit = null;

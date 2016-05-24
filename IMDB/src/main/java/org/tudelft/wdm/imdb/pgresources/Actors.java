@@ -40,7 +40,7 @@ import org.tudelft.wdm.imdb.models.MessageJSON;
  * @version v0.3s (19.05.2016)
  * 
  **/
-@Path("actors")
+@Path("pg/actors")
 public class Actors {
     
     /**
