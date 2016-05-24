@@ -36,4 +36,24 @@ public class Movies {
             return new MessageJSON();
         }
     }
+    
+    /**
+     * Retrieve a single movie by its title. An empty document is returned if
+     * no movie titles meet the specified query.
+     * 
+     * @param title Title or substring of movie title.
+     * @return Movie details or empty document.
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/title/{movieTitle}")
+    public MessageJSON movieByTitle(@PathParam("movieTitle") String title) {
+    	Movie movie = MovieController.getMovieByTitle(title);
+
+        if (movie != null) {
+            return new MessageJSON(movie);
+        } else {
+            return new MessageJSON();
+        }
+    }
 }

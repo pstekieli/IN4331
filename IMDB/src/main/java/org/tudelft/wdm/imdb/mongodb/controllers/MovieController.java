@@ -1,6 +1,7 @@
 package org.tudelft.wdm.imdb.mongodb.controllers;
 
 import java.net.UnknownHostException;
+import java.util.regex.Pattern;
 
 import org.tudelft.wdm.imdb.models.Movie;
 
@@ -47,5 +48,24 @@ public class MovieController {
                 (Integer) document.get("year")
             );
         }
+    }
+    
+    public static Movie getMovieByTitle(String title) {
+    	initMongoDB();
+    	
+    	Pattern expression = Pattern.compile(title, Pattern.CASE_INSENSITIVE);
+    	BasicDBObject query = new BasicDBObject("title", new BasicDBObject("$regex", expression));
+    	
+    	DBObject document = moviesCollection.findOne(query);
+    	
+    	if (document == null) {
+    		return null;
+    	} else {
+    		return new Movie(
+                (Integer) document.get("idmovies"), 
+                (String) document.get("title"),
+                (Integer) document.get("year")
+            );
+    	}
     }
 }
