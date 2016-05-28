@@ -23,6 +23,8 @@
  */
 package org.tudelft.wdm.imdb.models;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -32,8 +34,10 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @version v0.1 (15.05.2016)
  * @version v0.2 (18.05.2016)
  * @version v0.3s (19.05.2016)
+ * @version v0.4 (28.05.2016)
  * 
  **/
+@JsonSerialize(include = Inclusion.NON_NULL) /* Omit empty ArrayLists */
 @XmlRootElement (name = "Serie")
 public class Serie {
     @XmlElement (name = "Serie ID")

@@ -23,6 +23,10 @@
  */
 package org.tudelft.wdm.imdb.models;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion;
+import java.util.ArrayList;
+import javax.ws.rs.core.Link;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -32,8 +36,10 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @version v0.1 (15.05.2016)
  * @version v0.2 (18.05.2016)
  * @version v0.3s (19.05.2016)
+ * @version v0.4 (28.05.2016)
  * 
  **/
+@JsonSerialize(include = Inclusion.NON_NULL) /* Omit empty ArrayLists */
 @XmlRootElement(name = "Movie")
 public class Movie {    
    
@@ -44,9 +50,67 @@ public class Movie {
     @XmlElement (name = "Year")
     private final int Year;    
     
+    @XmlElement (name = "Actors")
+    private ArrayList<Actor> Actors;    
+    @XmlElement (name = "Genres")
+    private ArrayList<Genre> Genres;    
+    @XmlElement (name = "Keywords")
+    private ArrayList<Keyword> Keywords;    
+    @XmlElement (name = "Series")
+    private ArrayList<Serie> Series;    
+    @XmlElement (name = "References")
+    private ArrayList<Link> References;
+    
     public Movie(long idMovie, String Title, int Year) {
         this.idMovie = idMovie;
         this.Title = Title;
         this.Year = Year;       
-    }    
+    }  
+    
+    public void AddReference(Link Link) {
+        if (References == null) {
+            References = new ArrayList<>();
+        }        
+        References.add(Link);
+    }
+    
+    public void AddActor(Actor actor) {
+        if (Actors == null)
+            Actors = new ArrayList<>();        
+        Actors.add(actor);        
+    }
+    
+    public void AddGenre(Genre genre) {
+        if (Genres == null)
+            Genres = new ArrayList<>();        
+        Genres.add(genre);
+    }
+    
+    public void AddKeyword(Keyword keyword) {
+        if (Keywords == null)
+            Keywords = new ArrayList<>();        
+        Keywords.add(keyword);
+    }
+    
+    public void AddSerie(Serie serie) {
+        if (Series == null)
+            Series = new ArrayList<>();        
+        Series.add(serie);
+    }
+    
+    public ArrayList<Actor> displayActors() {
+        return Actors;
+    }
+    
+    public ArrayList<Genre> displayGenres() {
+        return Genres;
+    }
+    
+    public ArrayList<Keyword> displayKeywords() {
+        return Keywords;
+    }
+    
+    public ArrayList<Serie> displaySeries() {
+        return Series;
+    }
 }

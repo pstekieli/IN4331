@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.tudelft.wdm.imdb.models.Actor;
-import org.tudelft.wdm.imdb.models.MessageJSON;
+import org.tudelft.wdm.imdb.models.Movie;
 
 /**
  *
@@ -36,29 +36,77 @@ import org.tudelft.wdm.imdb.models.MessageJSON;
  * @version v0.1 (15.05.2016)
  * @version v0.2 (18.05.2016)
  * @version v0.3s (19.05.2016)
+ * @version v0.4 (28.05.2016)
  * 
  **/
 public class ActorController {
     
     private final ArrayList<String> Queries = new ArrayList<>();
-    private final JDBC JDBC = new JDBC();
-    private final MessageJSON MessageJSON = new MessageJSON();
+    private final JDBC JDBC = new JDBC();    
     
-    public void SetActiveFiltersForCollection(Long limit, Long offset, String sort) {        
+    public ArrayList<Long> SetActiveFiltersForCollection(Long offset, String sort) {        
         /* ---------------------SET DEFAULTS IF NULL------------------------ */
-        if (limit == null)
-            limit = Long.parseLong("100");
+        Long limit = Long.parseLong("10");
         if (offset == null) 
             offset = Long.parseLong("0");        
         if (sort == null)
             sort = "idactors";
-        /* ----------------------------------------------------------------- */
-        
-        Queries.add("SELECT DISTINCT a.idactors, a.fname, a.lname, a.gender "
+        /* ----------------------------------------------------------------- */        
+        String Query = "SELECT DISTINCT a.idactors, a.fname, a.lname, a.gender "
             + "FROM actors a "            
             + "ORDER BY a." + sort + " " 
-            + "LIMIT " + limit + " OFFSET " + offset + ";");    
-    }    
+            + "LIMIT " + limit + " OFFSET " + offset + ";";    
+        ArrayList<Long> TemporaryCollection = new ArrayList<>();
+        JDBC.PerformQuery(Query);        
+        try {                
+            while (JDBC.getResultSet().next()) {
+                TemporaryCollection.add(JDBC.getResultSet().getLong("idactors"));
+            }
+        } catch (SQLException ex) {
+                Logger.getLogger(MovieController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return TemporaryCollection;
+    }  
+    public ArrayList<Long> SetActiveFiltersForCollectionByName(String fname, String lname, String sort) {        
+        /* ---------------------SET DEFAULTS IF NULL------------------------ */               
+        if (sort == null)
+            sort = "idactors";
+        /* ----------------------------------------------------------------- */
+        String Query = null;
+        if (fname != null && lname != null) {
+          Query = "SELECT DISTINCT a.idactors, a.fname, a.lname, a.gender "
+            + "FROM actors a " 
+            + "WHERE a.fname = '" + fname + "' AND a.lname = '" + lname + "' "      
+            + "ORDER BY a." + sort + ";";               
+        }
+        else if (fname != null && lname == null) {
+          Query = "SELECT DISTINCT a.idactors, a.fname, a.lname, a.gender "
+            + "FROM actors a " 
+            + "WHERE a.fname = '" + fname + "' "      
+            + "ORDER BY a." + sort + ";";    
+        }
+        else if (fname == null && lname != null) {
+          Query = "SELECT DISTINCT a.idactors, a.fname, a.lname, a.gender "
+            + "FROM actors a " 
+            + "WHERE a.lname = '" + lname + "' "      
+            + "ORDER BY a." + sort + ";";    
+        }
+        else {
+          Query = "SELECT DISTINCT a.idactors, a.fname, a.lname, a.gender "
+            + "FROM actors a "                
+            + "ORDER BY a." + sort + ";";    
+        }
+        ArrayList<Long> TemporaryCollection = new ArrayList<>();
+        JDBC.PerformQuery(Query);        
+        try {                
+            while (JDBC.getResultSet().next()) {
+                TemporaryCollection.add(JDBC.getResultSet().getLong("idactors"));
+            }
+        } catch (SQLException ex) {
+                Logger.getLogger(MovieController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return TemporaryCollection; 
+    }
     public void SetActiveFiltersForSingle (long id, String sort) {
         Queries.add("SELECT DISTINCT a.idactors, a.fname, a.lname, a.gender "
             + "FROM actors a "            
@@ -90,73 +138,58 @@ public class ActorController {
             "JOIN movies m " +
             "ON ai.idmovies=m.idmovies " +                
             "WHERE a.idactors=" + id + ";");
-    }
-   
-    public ArrayList<Actor> GetActorListFromDB() {
-        ArrayList<Actor> TemporaryCollection = new ArrayList<>();        
-            try {                
-                while (JDBC.getResultSet().next()) {
-                    TemporaryCollection.add(new Actor(JDBC.getResultSet().getLong("idactors"), JDBC.getResultSet().getString("fname"), JDBC.getResultSet().getString("lname"), JDBC.getResultSet().getString("gender")));
-                }
-            } catch (SQLException ex) {
-                Logger.getLogger(MovieController.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        JDBC.CloseConnection();
+    }   
+    public ArrayList<Actor> GetActorInformation(ArrayList<Long> id, String sort) {
+        ArrayList<Actor> TemporaryCollection = new ArrayList<>(); 
+        for (Long x : id) {
+            if (Queries != null)
+                Queries.clear();
+            SetActiveFiltersForSingle(x, sort);            
+            Actor actor = GetBasicInformation();            
+            if (actor != null) {
+                GetMoviesInformation(actor);
+                GetActorStatistics(actor);  
+            }            
+            TemporaryCollection.add(actor);
+        }
         return TemporaryCollection;
     }
-    public MessageJSON GetAllActors(Long limit, Long offset, String sort) {
-        SetActiveFiltersForCollection(limit, offset, sort);
+    public Actor GetBasicInformation() {
         JDBC.PerformQuery(Queries.get(0));
-        ArrayList<Actor> Actors = GetActorListFromDB();
-        for (int i = 0; i < Actors.size(); i++)        
-            getMessageJSON().AddActor(Actors.get(i));
-        JDBC.CloseConnection();
-        return getMessageJSON();
+        Actor actor = null;
+        try {
+            while (JDBC.getResultSet().next()) {
+                actor = new Actor(JDBC.getResultSet().getLong("idactors"), JDBC.getResultSet().getString("fname"), JDBC.getResultSet().getString("lname"), JDBC.getResultSet().getString("gender"));
+            }
+        } 
+        catch (SQLException ex) {
+            Logger.getLogger(MovieController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        JDBC.CloseConnection(); 
+        return actor;
     }
-    public MessageJSON GetShortActorInformation(long id, String sort) {               
-        SetActiveFiltersForSingle(id, sort);
-        JDBC.PerformQuery(Queries.get(0));
-        getMessageJSON().AddActor(GetActorListFromDB().get(0));
-        JDBC.CloseConnection();
-        return getMessageJSON(); /* Get first (and only) position */
-    }
-    public MessageJSON GetDetailedActorInformation(long id, String sort) {        
-        GetShortActorInformation(id, sort);
-        GetMoviesInformation();
-        GetActorStatistics();
-        return getMessageJSON();
-    }   
-    public MessageJSON GetMoviesInformation() {
+    public void GetMoviesInformation(Actor actor) {
         JDBC.PerformQuery(Queries.get(1));
         try {
             while (JDBC.getResultSet().next()) {
-                getMessageJSON().AddMovie(JDBC.getResultSet().getLong("idmovies"), JDBC.getResultSet().getString("title"), JDBC.getResultSet().getInt("year"));    
+                actor.AddMovie(new Movie(JDBC.getResultSet().getLong("idmovies"), JDBC.getResultSet().getString("title"), JDBC.getResultSet().getInt("year")));    
             }
         } 
         catch (SQLException ex) {
             Logger.getLogger(MovieController.class.getName()).log(Level.SEVERE, null, ex);
         }
-        JDBC.CloseConnection(); 
-        return getMessageJSON();
+        JDBC.CloseConnection();        
     }
-    public MessageJSON GetActorStatistics() {        
+    public void GetActorStatistics(Actor actor) {        
         JDBC.PerformQuery(Queries.get(2));
         try {
             while (JDBC.getResultSet().next()) {
-                getMessageJSON().SetStatistic(JDBC.getResultSet().getInt("number"));    
+                actor.SetStatistic(JDBC.getResultSet().getInt("number"));    
             }
         } 
         catch (SQLException ex) {
             Logger.getLogger(MovieController.class.getName()).log(Level.SEVERE, null, ex);
         }
-        JDBC.CloseConnection(); 
-        return getMessageJSON();
-    }
-    
-     /**
-     * @return the MessageJSON
-     */
-    public MessageJSON getMessageJSON() {
-        return MessageJSON;
-    }
+        JDBC.CloseConnection();        
+    }    
 }

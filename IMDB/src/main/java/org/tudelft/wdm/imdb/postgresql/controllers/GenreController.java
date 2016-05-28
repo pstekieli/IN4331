@@ -30,7 +30,7 @@ import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.tudelft.wdm.imdb.models.Genre;
-import org.tudelft.wdm.imdb.models.MessageJSON;
+import org.tudelft.wdm.imdb.models.Movie;
 
 /**
  *
@@ -38,27 +38,42 @@ import org.tudelft.wdm.imdb.models.MessageJSON;
  * @version v0.1 (15.05.2016)
  * @version v0.2 (18.05.2016)
  * @version v0.3s (19.05.2016)
+ * @version v0.4 (28.05.2016)
  * 
  **/
 public class GenreController {
     private final ArrayList<String> Queries = new ArrayList<>();
-    private final JDBC JDBC = new JDBC();
-    private final MessageJSON MessageJSON = new MessageJSON();
+    private final JDBC JDBC = new JDBC();    
     
-    public void SetActiveFiltersForCollection(String sort) {        
+    public ArrayList<Genre> SetActiveFiltersForCollection(String sort) {        
         /* ---------------------SET DEFAULTS IF NULL------------------------ */                
         if (sort == null)
             sort = "idgenres";
-        /* ----------------------------------------------------------------- */
-        
-        Queries.add("SELECT DISTINCT g.idgenres, g.genre "
-            + "FROM genres g "            
-            + "ORDER BY g." + sort + ";");                
+        /* ----------------------------------------------------------------- */        
+        String Query = "SELECT DISTINCT g.idgenres, g.genre, COUNT(DISTINCT m.title) AS number "
+            + "FROM genres g " 
+            + "JOIN movies_genres mg " 
+            + "ON mg.idgenres=g.idgenres " 
+            + "JOIN movies m " 
+            + "ON mg.idmovies = m.idmovies "            
+            + "GROUP BY g.idgenres "
+            + "ORDER BY g." + sort + ";";    
+        ArrayList<Genre> TemporaryCollection = new ArrayList<>();
+        JDBC.PerformQuery(Query);        
+        try {                
+            while (JDBC.getResultSet().next()) {
+                Genre genre = new Genre(JDBC.getResultSet().getLong("idgenres"), JDBC.getResultSet().getString("genre"));
+                genre.SetStatistic(JDBC.getResultSet().getInt("number"));
+                TemporaryCollection.add(genre);                
+            }
+        } catch (SQLException ex) {
+                Logger.getLogger(MovieController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return TemporaryCollection;
     }     
-    public void SetActiveFiltersForSingle (Long limit, Long offset, Long id, Integer year, Integer endyear, String sort, String sort2) {
+    public void SetActiveFiltersForSingle (Long offset, Long id, Integer year, Integer endyear, String sort, String sort2) {
         /* ---------------------SET DEFAULTS IF NULL------------------------ */
-        if (limit == null)
-            limit = (long)100;
+        Long limit = (long)10;
         if (offset == null)
             offset = (long)0;
         if (sort == null)
@@ -95,72 +110,57 @@ public class GenreController {
             "WHERE g.idgenres = " + id + " " +
             "AND m.year >= " + year + " AND m.year <= " + endyear + ";");
     }
-   
-    public ArrayList<Genre> GetGenreListFromDB() {
-        ArrayList<Genre> TemporaryCollection = new ArrayList<>();        
-            try {                
-                while (JDBC.getResultSet().next()) {
-                    TemporaryCollection.add(new Genre(JDBC.getResultSet().getLong("idgenres"), JDBC.getResultSet().getString("genre")));
-                }
-            } catch (SQLException ex) {
-                Logger.getLogger(MovieController.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        JDBC.CloseConnection();
+    public ArrayList<Genre> GetGenreInformation(Long offset, ArrayList<Long> id, Integer year, Integer endyear, String sort, String sort2) {
+        ArrayList<Genre> TemporaryCollection = new ArrayList<>(); 
+        for (Long x : id) {
+            if (Queries != null)
+                Queries.clear();
+            SetActiveFiltersForSingle(offset, x, year, endyear, sort, sort2);            
+            Genre genre = GetBasicInformation();            
+            if (genre != null) {
+                GetMoviesInformation(genre);
+                GetGenreStatistics(genre);  
+            }            
+            TemporaryCollection.add(genre);
+        }
         return TemporaryCollection;
-    }
-    public MessageJSON GetAllGenres(String sort) {
-        SetActiveFiltersForCollection(sort);
+    }    
+    public Genre GetBasicInformation() {
         JDBC.PerformQuery(Queries.get(0));
-        ArrayList<Genre> Genres = GetGenreListFromDB();
-        for (int i = 0; i < Genres.size(); i++)        
-            getMessageJSON().AddGenre(Genres.get(i));
-        JDBC.CloseConnection();
-        return getMessageJSON();
+        Genre genre = null;
+        try {
+            while (JDBC.getResultSet().next()) {
+                genre = new Genre(JDBC.getResultSet().getLong("idgenres"), JDBC.getResultSet().getString("genre"));
+            }
+        } 
+        catch (SQLException ex) {
+            Logger.getLogger(MovieController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        JDBC.CloseConnection(); 
+        return genre;
     }
-    public MessageJSON GetShortGenreInformation(Long limit, Long offset, Long id, Integer year, Integer endyear, String sort, String sort2) {               
-        SetActiveFiltersForSingle(limit, offset, id, year, endyear, sort, sort2);
-        JDBC.PerformQuery(Queries.get(0));
-        getMessageJSON().AddGenre(GetGenreListFromDB().get(0));
-        JDBC.CloseConnection();
-        return getMessageJSON(); /* Get first (and only) position */
-    }
-    public MessageJSON GetDetailedGenreInformation(Long limit, Long offset, Long id, Integer year, Integer endyear, String sort, String sort2) {        
-        GetShortGenreInformation(limit, offset, id, year, endyear, sort, sort2);
-        GetMoviesInformation();
-        GetGenreStatistics();
-        return getMessageJSON();
-    }   
-    public MessageJSON GetMoviesInformation() {
+    public void GetMoviesInformation(Genre genre) {
         JDBC.PerformQuery(Queries.get(1));
         try {
             while (JDBC.getResultSet().next()) {
-                getMessageJSON().AddMovie(JDBC.getResultSet().getLong("idmovies"), JDBC.getResultSet().getString("title"), JDBC.getResultSet().getInt("year"));    
+                genre.AddMovie(new Movie(JDBC.getResultSet().getLong("idmovies"), JDBC.getResultSet().getString("title"), JDBC.getResultSet().getInt("year")));    
             }
         } 
         catch (SQLException ex) {
             Logger.getLogger(MovieController.class.getName()).log(Level.SEVERE, null, ex);
         }
-        JDBC.CloseConnection(); 
-        return getMessageJSON();
-    }
-    public MessageJSON GetGenreStatistics() {        
+        JDBC.CloseConnection();        
+    }       
+    public void GetGenreStatistics(Genre genre) {        
         JDBC.PerformQuery(Queries.get(2));
         try {
             while (JDBC.getResultSet().next()) {
-                getMessageJSON().SetStatistic(JDBC.getResultSet().getInt("number"));    
+                genre.SetStatistic(JDBC.getResultSet().getInt("number"));    
             }
         } 
         catch (SQLException ex) {
             Logger.getLogger(MovieController.class.getName()).log(Level.SEVERE, null, ex);
         }
-        JDBC.CloseConnection(); 
-        return getMessageJSON();
-    }
-    
-     /**
-     * @return the MessageJSON
-     */
-    public MessageJSON getMessageJSON() {
-        return MessageJSON;
-    }
+        JDBC.CloseConnection();         
+    }    
 }

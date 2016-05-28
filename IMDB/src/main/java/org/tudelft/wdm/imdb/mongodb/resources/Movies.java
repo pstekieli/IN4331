@@ -6,7 +6,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import org.tudelft.wdm.imdb.models.MessageJSON;
 import org.tudelft.wdm.imdb.models.Movie;
 import org.tudelft.wdm.imdb.mongodb.controllers.MovieController;
 
@@ -27,13 +26,13 @@ public class Movies {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/id/{movieId}")
-    public MessageJSON movieById(@PathParam("movieId") String id) {
+    public Movie movieById(@PathParam("movieId") String id) {
         Movie movie = MovieController.getMovieById(Long.parseLong(id));
 
         if (movie != null) {
-            return new MessageJSON(movie);
+            return movie;
         } else {
-            return new MessageJSON();
+            return null;
         }
     }
     
@@ -47,13 +46,13 @@ public class Movies {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/title/{movieTitle}")
-    public MessageJSON movieByTitle(@PathParam("movieTitle") String title) {
+    public Movie movieByTitle(@PathParam("movieTitle") String title) {
     	Movie movie = MovieController.getMovieByTitle(title);
 
         if (movie != null) {
-            return new MessageJSON(movie);
+            return movie;
         } else {
-            return new MessageJSON();
+            return null;
         }
     }
 }

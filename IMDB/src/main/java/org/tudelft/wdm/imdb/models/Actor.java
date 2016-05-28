@@ -23,6 +23,10 @@
  */
 package org.tudelft.wdm.imdb.models;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion;
+import java.util.ArrayList;
+import javax.ws.rs.core.Link;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -32,8 +36,10 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @version v0.1 (15.05.2016)
  * @version v0.2 (18.05.2016)
  * @version v0.3s (19.05.2016)
+ * @version v0.4 (28.05.2016)
  * 
  **/
+@JsonSerialize(include = Inclusion.NON_NULL) /* Omit empty ArrayLists */
 @XmlRootElement (name = "Actor")
 public class Actor {
     
@@ -45,13 +51,43 @@ public class Actor {
     private final String LastName;
     @XmlElement (name = "Gender ID")
     private final String Gender;
-       
+    
+    @XmlElement (name = "Movies")
+    private ArrayList<Movie> Movies;
+    @XmlElement (name = "References")
+    private ArrayList<Link> References;
+    @XmlElement (name = "Number Of Movies")
+    private Integer Statistic = null;
+    
     public Actor(long idActor, String FirstName, String LastName, String Gender) {
         this.idActor = idActor;
         this.FirstName = FirstName;
         this.LastName = LastName;
         this.Gender = Gender;
     }
-
     
+    public void AddReference(Link Link) {
+        if (References == null) {
+            References = new ArrayList<>();
+        }        
+        References.add(Link);
+    }
+    
+    public void AddMovie(Movie movie) {
+        if (Movies == null)
+            Movies = new ArrayList<>();        
+        Movies.add(movie);
+    }
+    
+    public void SetStatistic(Integer Statistic) {
+        this.Statistic = Statistic;
+    }   
+    
+    public ArrayList<Movie> displayMovies() {
+        return Movies;
+    }
+    
+    public Integer displayStatistics() {
+        return Statistic;
+    }
 }

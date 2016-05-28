@@ -23,13 +23,19 @@
  */
 package org.tudelft.wdm.imdb.postgresql.resources;
 
+import java.net.URI;
+import java.util.ArrayList;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import org.tudelft.wdm.imdb.models.MessageJSON;
+import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.UriInfo;
+import org.tudelft.wdm.imdb.models.Genre;
+import org.tudelft.wdm.imdb.models.Movie;
 import org.tudelft.wdm.imdb.postgresql.controllers.GenreController;
 
 /**
@@ -38,58 +44,58 @@ import org.tudelft.wdm.imdb.postgresql.controllers.GenreController;
  * @version v0.1 (15.05.2016)
  * @version v0.2 (18.05.2016)
  * @version v0.3s (19.05.2016)
+ * @version v0.4 (28.05.2016)
  * 
  **/
 @Path("postgresql/genres")
 public class Genres {
 
+    @Context
+    UriInfo uriInfo;
+    
     Long voffset = null, vlimit = null;
     Integer vyear = null, vendyear = null;  
     
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public MessageJSON getAllGenres(@QueryParam("orderby") String sort) {         
-        GenreController ActorController = new GenreController();        
-        if (sort == null)
-            ActorController.GetAllGenres(null);
-        else
-            ActorController.GetAllGenres(sort);
-        return ActorController.getMessageJSON();
+    public ArrayList<Genre> getAllGenres(@QueryParam("sort") String sort) {        
+        GenreController GenreController = new GenreController();        
+        return GenreController.SetActiveFiltersForCollection(sort);
         }        
     
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{genreId}")
-    public MessageJSON displayDetailed(@PathParam("genreId") String id, @QueryParam("offset") String offset, @QueryParam("limit") String limit, @QueryParam("year") String year, @QueryParam("endyear") String endyear, @QueryParam("orderby1") String order, @QueryParam("orderby2") String order2, @QueryParam("details") String details) {        
+    public ArrayList<Genre> displayDetailed(@PathParam("genreId") Long id, @QueryParam("offset") String offset, @QueryParam("limit") String limit, @QueryParam("year") String year, @QueryParam("endyear") String endyear, @QueryParam("orderby1") String order, @QueryParam("orderby2") String order2) {        
         GenreController GenreController = new GenreController();        
         ParseWhatPossible(limit, offset, year, endyear);             
-        if ("true".equals(details))
-            GenreController.GetDetailedGenreInformation(vlimit, voffset, Long.parseLong(id), vyear, vendyear, order, order2);        
-        else
-            GenreController.GetShortGenreInformation(vlimit, voffset, Long.parseLong(id), vyear, vendyear, order, order2);
-        return GenreController.getMessageJSON();
+        ArrayList<Long> single = new ArrayList<>();
+        single.add(id);               
+        return GenreController.GetGenreInformation(voffset, single, vyear, vendyear, order, order2);
     }
     
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{genreId}/movies")
-    public MessageJSON displayMovies(@PathParam("genreId") String id, @QueryParam("offset") String offset, @QueryParam("limit") String limit, @QueryParam("year") String year, @QueryParam("endyear") String endyear, @QueryParam("orderby1") String order, @QueryParam("orderby2") String order2, @QueryParam("details") String details) {        
+    public ArrayList<Movie> displayMovies(@PathParam("genreId") Long id, @QueryParam("offset") String offset, @QueryParam("limit") String limit, @QueryParam("year") String year, @QueryParam("endyear") String endyear, @QueryParam("orderby1") String order, @QueryParam("orderby2") String order2) {        
         GenreController GenreController = new GenreController();        
-        ParseWhatPossible(limit, offset, year, endyear);
-        GenreController.SetActiveFiltersForSingle(vlimit, voffset, Long.parseLong(id), vyear, vendyear, order, order2);
-        GenreController.GetMoviesInformation();
-        return GenreController.getMessageJSON();
+        ParseWhatPossible(limit, offset, year, endyear);             
+        ArrayList<Long> single = new ArrayList<>();
+        single.add(id);
+        ArrayList<Genre> genre = GenreController.GetGenreInformation(voffset, single, vyear, vendyear, order, order2);
+        return genre.get(0).displayMovies();
     }
     
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{genreId}/statistics")
-    public MessageJSON displayStatistics(@PathParam("genreId") String id, @QueryParam("offset") String offset, @QueryParam("limit") String limit, @QueryParam("year") String year, @QueryParam("endyear") String endyear, @QueryParam("orderby1") String order, @QueryParam("orderby2") String order2, @QueryParam("details") String details) {        
+    public Integer displayStatistics(@PathParam("genreId") Long id, @QueryParam("offset") String offset, @QueryParam("limit") String limit, @QueryParam("year") String year, @QueryParam("endyear") String endyear, @QueryParam("orderby1") String order, @QueryParam("orderby2") String order2) {        
         GenreController GenreController = new GenreController();        
-        ParseWhatPossible(limit, offset, year, endyear);
-        GenreController.SetActiveFiltersForSingle(vlimit, voffset, Long.parseLong(id), vyear, vendyear, order, order2);
-        GenreController.GetGenreStatistics();
-        return GenreController.getMessageJSON();
+        ParseWhatPossible(limit, offset, year, endyear);             
+        ArrayList<Long> single = new ArrayList<>();
+        single.add(id);
+        ArrayList<Genre> genre = GenreController.GetGenreInformation(voffset, single, vyear, vendyear, order, order2);
+        return genre.get(0).displayStatistics();
     }
     
     private void ParseWhatPossible(String limit, String offset, String year, String endyear) {                   
@@ -97,5 +103,18 @@ public class Genres {
         if (limit != null) {vlimit = Long.parseLong(limit);}
         if (year != null) {vyear = Integer.parseInt(year);}
         if (endyear != null) {vendyear = Integer.parseInt(endyear);}          
+    }
+    
+    private URI prepareURI(Long id) {
+        UriBuilder ub = uriInfo.getAbsolutePathBuilder();
+        String s = Long.toString(id);
+        URI userUri = ub.path(s).build();
+        return userUri;
+    }
+    
+     private URI prepareStringURI(String path) {
+        UriBuilder ub = uriInfo.getAbsolutePathBuilder();        
+        URI userUri = ub.path(path).build();
+        return userUri;
     }
 }

@@ -23,14 +23,19 @@
  */
 package org.tudelft.wdm.imdb.postgresql.resources;
 
+import java.util.ArrayList;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import org.tudelft.wdm.imdb.models.Actor;
+import org.tudelft.wdm.imdb.models.Genre;
+import org.tudelft.wdm.imdb.models.Keyword;
 
-import org.tudelft.wdm.imdb.models.MessageJSON;
+import org.tudelft.wdm.imdb.models.Movie;
+import org.tudelft.wdm.imdb.models.Serie;
 import org.tudelft.wdm.imdb.postgresql.controllers.MovieController;
 
 
@@ -40,6 +45,7 @@ import org.tudelft.wdm.imdb.postgresql.controllers.MovieController;
  * @version v0.1 (15.05.2016)
  * @version v0.2 (18.05.2016)
  * @version v0.3s (19.05.2016)
+ * @version v0.4 (28.05.2016)
  * 
  **/
 @Path("postgresql/movies")
@@ -50,77 +56,78 @@ public class Movies {
      * to the client as "text/plain" media type 
      * 
      * @param offset
-     * @param limit
-     * @param year
-     * @param endyear
-     * @param order
+     * @param sort
+     * @param title
      * @return String that will be returned as a text/plain response.
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public MessageJSON getAllMovies(@QueryParam("offset") String offset, @QueryParam("limit") String limit, @QueryParam("year") String year, @QueryParam("endyear") String endyear, @QueryParam("orderby") String order) {         
+    public ArrayList<Movie> getAllMovies(@QueryParam("offset") String offset, @QueryParam("orderby") String sort, @QueryParam("title") String title) {         
         MovieController MovieController = new MovieController();        
-        /* ---------------------PARSE WHAT POSSIBLE------------------------ */
-        Long voffset = null, vlimit = null;
-        Integer vyear = null, vendyear = null;        
-        if (offset != null) {voffset = Long.parseLong(offset);}
-        if (limit != null) {vlimit = Long.parseLong(limit);}
-        if (year != null) {vyear = Integer.parseInt(year);}
-        if (endyear != null) {vendyear = Integer.parseInt(endyear);}
+        /* ---------------------PARSE WHAT POSSIBLE------------------------ */        
+        Long voffset = null;                
+        if (offset != null) {voffset = Long.parseLong(offset);}        
          /* ----------------------------------------------------------------- */
-        MovieController.GetAllMovies(vlimit, voffset, vyear, vendyear, order);
-        return MovieController.getMessageJSON();
+        ArrayList<Long> IDs = null;
+        if (title != null) {
+            IDs = MovieController.SetActiveFiltersForCollectionByTitle(title, sort);
+        } else {              
+            IDs = MovieController.SetActiveFiltersForCollection(voffset, sort);
+        }
+        return MovieController.GetMovieInformation(IDs);
     }
     
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{movieId}")
-    public MessageJSON displayDetailed(@PathParam("movieId") String id, @QueryParam("details") String details) {        
+    public ArrayList<Movie> displayDetailed(@PathParam("movieId") Long id) {        
         MovieController MovieController = new MovieController();        
-        if ("true".equals(details))
-            MovieController.GetDetailedMovieInformation(Long.parseLong(id));
-        else
-            MovieController.GetShortMovieInformation(Long.parseLong(id));
-        return MovieController.getMessageJSON();
+        ArrayList<Long> single = new ArrayList<>();
+        single.add(id);        
+        return MovieController.GetMovieInformation(single);
     }
     
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{movieId}/actors")
-    public MessageJSON displayActors(@PathParam("movieId") String id) {        
+    public ArrayList<Actor> displayActors(@PathParam("movieId") Long id) {        
         MovieController MovieController = new MovieController();        
-        MovieController.SetActiveFiltersForSingle(Long.parseLong(id));
-        MovieController.GetActorsInformation();
-        return MovieController.getMessageJSON();
+        ArrayList<Long> single = new ArrayList<>();
+        single.add(id);
+        ArrayList<Movie> movie = MovieController.GetMovieInformation(single);
+        return movie.get(0).displayActors();
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{movieId}/genres")
-    public MessageJSON displayGenres(@PathParam("movieId") String id) {        
+    public ArrayList<Genre> displayGenres(@PathParam("movieId") Long id) {        
         MovieController MovieController = new MovieController();        
-        MovieController.SetActiveFiltersForSingle(Long.parseLong(id));
-        MovieController.GetGenresInformation();
-        return MovieController.getMessageJSON();
+        ArrayList<Long> single = new ArrayList<>();
+        single.add(id);
+        ArrayList<Movie> movie = MovieController.GetMovieInformation(single);
+        return movie.get(0).displayGenres();
     }
     
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{movieId}/keywords")
-    public MessageJSON displayKeywords(@PathParam("movieId") String id) {        
+    public ArrayList<Keyword> displayKeywords(@PathParam("movieId") Long id) {        
         MovieController MovieController = new MovieController();        
-        MovieController.SetActiveFiltersForSingle(Long.parseLong(id));
-        MovieController.GetKeywordsInformation();
-        return MovieController.getMessageJSON();
+        ArrayList<Long> single = new ArrayList<>();
+        single.add(id);
+        ArrayList<Movie> movie = MovieController.GetMovieInformation(single);
+        return movie.get(0).displayKeywords();
     }
     
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{movieId}/series")
-    public MessageJSON displaySeries(@PathParam("movieId") String id) {        
+    public ArrayList<Serie> displaySeries(@PathParam("movieId") Long id) {        
         MovieController MovieController = new MovieController();        
-        MovieController.SetActiveFiltersForSingle(Long.parseLong(id));
-        MovieController.GetSeriesInformation();
-        return MovieController.getMessageJSON();
+        ArrayList<Long> single = new ArrayList<>();
+        single.add(id);
+        ArrayList<Movie> movie = MovieController.GetMovieInformation(single);
+        return movie.get(0).displaySeries();
     }
 }

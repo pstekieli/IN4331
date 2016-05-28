@@ -23,15 +23,17 @@
  */
 package org.tudelft.wdm.imdb.postgresql.resources;
 
+import java.util.ArrayList;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-
-import org.tudelft.wdm.imdb.models.MessageJSON;
+import org.tudelft.wdm.imdb.models.Actor;
+import org.tudelft.wdm.imdb.models.Movie;
 import org.tudelft.wdm.imdb.postgresql.controllers.ActorController;
+
 
 /**
  *
@@ -39,6 +41,7 @@ import org.tudelft.wdm.imdb.postgresql.controllers.ActorController;
  * @version v0.1 (15.05.2016)
  * @version v0.2 (18.05.2016)
  * @version v0.3s (19.05.2016)
+ * @version v0.4 (28.05.2016)
  * 
  **/
 @Path("postgresql/actors")
@@ -49,55 +52,58 @@ public class Actors {
      * to the client as "text/plain" media type.
      *
      * @param offset
-     * @param limit
      * @param sort
+     * @param fname
+     * @param lname
      * @return String that will be returned as a text/plain response.
      */
     
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public MessageJSON getAllActors(@QueryParam("offset") String offset, @QueryParam("limit") String limit, @QueryParam("orderby") String sort) {         
+    public ArrayList<Actor> getAllActors(@QueryParam("offset") String offset, @QueryParam("orderby") String sort, @QueryParam("fname") String fname, @QueryParam("lname") String lname) {         
         ActorController ActorController = new ActorController();        
         /* ---------------------PARSE WHAT POSSIBLE------------------------ */
-        Long voffset = null, vlimit = null;             
-        if (offset != null) {voffset = Long.parseLong(offset);}
-        if (limit != null) {vlimit = Long.parseLong(limit);}        
+        Long voffset = null;             
+        if (offset != null) {voffset = Long.parseLong(offset);}             
          /* ----------------------------------------------------------------- */          
-        ActorController.GetAllActors(vlimit, voffset, sort);
-        return ActorController.getMessageJSON();
-        }        
+        ArrayList<Long> IDs = null;
+        if (fname == null && lname == null) {
+            IDs = ActorController.SetActiveFiltersForCollection(voffset, sort);
+        } else {              
+            IDs = ActorController.SetActiveFiltersForCollectionByName(fname, lname, sort);
+        }
+        return ActorController.GetActorInformation(IDs, sort);
+    }        
     
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{actorId}")
-    public MessageJSON displayDetailed(@PathParam("actorId") String id, @QueryParam("details") String details, @QueryParam("orderby") String order) {        
+    public ArrayList<Actor> displayDetailed(@PathParam("actorId") Long id, @QueryParam("details") String details, @QueryParam("orderby") String sort) {        
         ActorController ActorController = new ActorController();        
-        if ("true".equals(details)) {           
-            ActorController.GetDetailedActorInformation(Long.parseLong(id), order);
-        }                        
-        else {           
-            ActorController.GetShortActorInformation(Long.parseLong(id), order);                        
-        }
-        return ActorController.getMessageJSON();
+        ArrayList<Long> single = new ArrayList<>();
+        single.add(id);        
+        return ActorController.GetActorInformation(single, sort);
     }
     
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{actorId}/movies")
-    public MessageJSON displayMovies(@PathParam("actorId") String id, @QueryParam("orderby") String sort) {        
-        ActorController ActorController = new ActorController();        
-        ActorController.SetActiveFiltersForSingle(Long.parseLong(id), sort);
-        ActorController.GetMoviesInformation();
-        return ActorController.getMessageJSON();
+    public ArrayList<Movie> displayMovies(@PathParam("actorId") Long id, @QueryParam("orderby") String sort) {        
+        ActorController ActorController = new ActorController();          
+        ArrayList<Long> single = new ArrayList<>();
+        single.add(id);
+        ArrayList<Actor> actor = ActorController.GetActorInformation(single, sort);
+        return actor.get(0).displayMovies();
     }
     
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{actorId}/statistics")
-    public MessageJSON displayStatistics(@PathParam("actorId") String id, @QueryParam("orderby") String sort) {        
-        ActorController ActorController = new ActorController();        
-        ActorController.SetActiveFiltersForSingle(Long.parseLong(id), sort);
-        ActorController.GetActorStatistics();
-        return ActorController.getMessageJSON();
+    public Integer displayStatistics(@PathParam("actorId") Long id, @QueryParam("orderby") String sort) {        
+        ActorController ActorController = new ActorController();          
+        ArrayList<Long> single = new ArrayList<>();
+        single.add(id);
+        ArrayList<Actor> actor = ActorController.GetActorInformation(single, sort);
+        return actor.get(0).displayStatistics();
     }
 }
