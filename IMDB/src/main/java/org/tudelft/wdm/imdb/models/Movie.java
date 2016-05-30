@@ -48,11 +48,11 @@ public class Movie {
     @XmlElement (name = "Title")
     private final String Title;    
     @XmlElement (name = "Year")
-    private final int Year;    
+    private final Integer Year;    
     
     @XmlElement (name = "Actors")
     private ArrayList<Actor> Actors;
-    @XmlElement (name = "GenreS")
+    @XmlElement (name = "Genres")
     private ArrayList<Genre> Genres;
     @XmlElement (name = "GenreLabels")
     private ArrayList<String> GenreLabels;
@@ -68,7 +68,7 @@ public class Movie {
     @XmlElement (name = "SeriesName")
     private String SeriesName;
     
-    public Movie(long idMovie, String Title, int Year) {
+    public Movie(long idMovie, String Title, Integer Year) {
         this.idMovie = idMovie;
         this.Title = Title;
         this.Year = Year;       

@@ -1,5 +1,7 @@
 package org.tudelft.wdm.imdb.mongodb.resources;
 
+import java.util.List;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -47,15 +49,10 @@ public class Movies {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    // TODO: Return list instead of a single result
-    public Movie movieByTitle(@QueryParam("title") String title, @QueryParam("year") String year) {
+    public List<Movie> moviesByTitle(@QueryParam("title") String title, @QueryParam("year") String year) {
     	Integer yearNumeric = year != null ? Integer.valueOf(year) : null;
-    	Movie movie = MovieController.getMovieByTitleYear(title, yearNumeric);
+    	List<Movie> movies = MovieController.getMoviesByTitleYear(title, yearNumeric);
 
-        if (movie != null) {
-            return movie;
-        } else {
-            return null;
-        }
+        return movies;
     }
 }

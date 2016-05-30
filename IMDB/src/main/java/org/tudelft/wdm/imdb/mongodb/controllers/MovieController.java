@@ -1,6 +1,8 @@
 package org.tudelft.wdm.imdb.mongodb.controllers;
 
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
@@ -64,7 +66,7 @@ public class MovieController {
             Movie movie = new Movie(
                 (Integer) document.get("idmovies"), 
                 (String) document.get("title"),
-                (Integer) document.get("year")
+                document.get("year") != null && document.get("year") instanceof Integer ? (Integer) document.get("year") : null
             );
             
             // Add name of the series - if any
@@ -110,7 +112,7 @@ public class MovieController {
             			gender
             		);
             		
-            		if (((String) actedInDocument.get("character")).length() > 0) {
+            		if (actedInDocument.get("character") instanceof String && ((String) actedInDocument.get("character")).length() > 0) {
             			actor.SetRole((String) actedInDocument.get("character"));
             		}
             		
@@ -135,7 +137,7 @@ public class MovieController {
         return createMovieObject(id);
     }
     
-    public static Movie getMovieByTitleYear(String title, Integer year) {
+    public static List<Movie> getMoviesByTitleYear(String title, Integer year) {
     	initMongoDB();
     	
     	Pattern expression = Pattern.compile(title, Pattern.CASE_INSENSITIVE | Pattern.LITERAL);
@@ -145,16 +147,14 @@ public class MovieController {
     		query.append("year", year);
     	}
     	
-    	DBObject document = moviesCollection.findOne(query);
+    	List<Movie> movies = new ArrayList<Movie>();
     	
-    	if (document == null) {
-    		return null;
-    	} else {
-    		return new Movie(
-                (Integer) document.get("idmovies"), 
-                (String) document.get("title"),
-                (Integer) document.get("year")
-            );
+    	try (DBCursor movieCursor = moviesCollection.find(query)) {
+    		while (movieCursor.hasNext()) {
+    			movies.add(createMovieObject((Integer) movieCursor.next().get("idmovies")));
+    		}
     	}
+    	
+    	return movies;
     }
 }
