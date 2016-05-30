@@ -4,6 +4,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.tudelft.wdm.imdb.models.Movie;
@@ -25,7 +26,7 @@ public class Movies {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/id/{movieId}")
+    @Path("/{movieId}")
     public Movie movieById(@PathParam("movieId") String id) {
         Movie movie = MovieController.getMovieById(Long.parseLong(id));
 
@@ -41,13 +42,15 @@ public class Movies {
      * no movie titles meet the specified query.
      * 
      * @param title Title or substring of movie title.
+     * @param year Optional filter for a specific year.
      * @return Movie details or empty document.
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/title/{movieTitle}")
-    public Movie movieByTitle(@PathParam("movieTitle") String title) {
-    	Movie movie = MovieController.getMovieByTitle(title);
+    // TODO: Return list instead of a single result
+    public Movie movieByTitle(@QueryParam("title") String title, @QueryParam("year") String year) {
+    	Integer yearNumeric = year != null ? Integer.valueOf(year) : null;
+    	Movie movie = MovieController.getMovieByTitleYear(title, yearNumeric);
 
         if (movie != null) {
             return movie;

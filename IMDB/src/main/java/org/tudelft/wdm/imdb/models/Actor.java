@@ -44,13 +44,16 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class Actor {
     
     @XmlElement (name = "Actor ID")
-    private final long idActor;
+    private final Long idActor;
     @XmlElement (name = "First Name")
     private final String FirstName;
     @XmlElement (name = "Last Name")
     private final String LastName;
     @XmlElement (name = "Gender ID")
     private final String Gender;
+    
+    @XmlElement (name = "Role")
+    private String Role;
     
     @XmlElement (name = "Movies")
     private ArrayList<Movie> Movies;
@@ -59,7 +62,7 @@ public class Actor {
     @XmlElement (name = "Number Of Movies")
     private Integer Statistic = null;
     
-    public Actor(long idActor, String FirstName, String LastName, String Gender) {
+    public Actor(Long idActor, String FirstName, String LastName, String Gender) {
         this.idActor = idActor;
         this.FirstName = FirstName;
         this.LastName = LastName;
@@ -77,6 +80,10 @@ public class Actor {
         if (Movies == null)
             Movies = new ArrayList<>();        
         Movies.add(movie);
+    }
+    
+    public void SetRole(String role) {
+    	this.Role = role;
     }
     
     public void SetStatistic(Integer Statistic) {

@@ -51,15 +51,22 @@ public class Movie {
     private final int Year;    
     
     @XmlElement (name = "Actors")
-    private ArrayList<Actor> Actors;    
-    @XmlElement (name = "Genres")
-    private ArrayList<Genre> Genres;    
+    private ArrayList<Actor> Actors;
+    @XmlElement (name = "GenreS")
+    private ArrayList<Genre> Genres;
+    @XmlElement (name = "GenreLabels")
+    private ArrayList<String> GenreLabels;
+    @XmlElement (name = "KeywordObjects")
+    private ArrayList<Keyword> KeywordObjects;
     @XmlElement (name = "Keywords")
-    private ArrayList<Keyword> Keywords;    
+    private ArrayList<String> Keywords;
     @XmlElement (name = "Series")
-    private ArrayList<Serie> Series;    
+    private ArrayList<Serie> Series;
     @XmlElement (name = "References")
     private ArrayList<Link> References;
+    
+    @XmlElement (name = "SeriesName")
+    private String SeriesName;
     
     public Movie(long idMovie, String Title, int Year) {
         this.idMovie = idMovie;
@@ -80,16 +87,29 @@ public class Movie {
         Actors.add(actor);        
     }
     
+    public void AddGenreLabel(String genreLabel) {
+        if (GenreLabels == null)
+        	GenreLabels = new ArrayList<>();        
+        GenreLabels.add(genreLabel);
+    }
+    
     public void AddGenre(Genre genre) {
         if (Genres == null)
-            Genres = new ArrayList<>();        
+        	Genres = new ArrayList<>();        
         Genres.add(genre);
     }
     
-    public void AddKeyword(Keyword keyword) {
-        if (Keywords == null)
-            Keywords = new ArrayList<>();        
-        Keywords.add(keyword);
+    public void AddKeywordObject(Keyword keyword) {
+        if (KeywordObjects == null)
+        	KeywordObjects = new ArrayList<>();        
+        KeywordObjects.add(keyword);
+    }
+    
+    public void AddKeyword(String keyword) {
+    	if (Keywords == null) {
+    		Keywords = new ArrayList<>();
+    	}
+    	Keywords.add(keyword);
     }
     
     public void AddSerie(Serie serie) {
@@ -106,11 +126,15 @@ public class Movie {
         return Genres;
     }
     
-    public ArrayList<Keyword> displayKeywords() {
-        return Keywords;
+    public ArrayList<Keyword> displayKeywordObjects() {
+        return KeywordObjects;
     }
     
     public ArrayList<Serie> displaySeries() {
         return Series;
+    }
+    
+    public void setSeriesName(String seriesName) {
+    	this.SeriesName = seriesName;
     }
 }

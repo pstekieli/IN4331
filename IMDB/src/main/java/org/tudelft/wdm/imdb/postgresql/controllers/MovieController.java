@@ -178,7 +178,7 @@ public class MovieController {
         JDBC.PerformQuery(Queries.get(3));
         try {
             while (JDBC.getResultSet().next()) {
-                movie.AddKeyword(new Keyword(JDBC.getResultSet().getLong("idkeywords"), JDBC.getResultSet().getString("keyword")));
+                movie.AddKeywordObject(new Keyword(JDBC.getResultSet().getLong("idkeywords"), JDBC.getResultSet().getString("keyword")));
             }
         } catch (SQLException ex) {
             Logger.getLogger(MovieController.class.getName()).log(Level.SEVERE, null, ex);

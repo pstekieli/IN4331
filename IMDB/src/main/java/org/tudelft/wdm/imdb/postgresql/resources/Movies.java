@@ -117,7 +117,7 @@ public class Movies {
         ArrayList<Long> single = new ArrayList<>();
         single.add(id);
         ArrayList<Movie> movie = MovieController.GetMovieInformation(single);
-        return movie.get(0).displayKeywords();
+        return movie.get(0).displayKeywordObjects();
     }
     
     @GET
