@@ -75,7 +75,7 @@ public class MovieController {
         if (sort == null)
             sort = "year";
         ArrayList<Long> TemporaryCollection = new ArrayList<>();
-        JDBC.PerformQuery("SELECT DISTINCT m.idmovies, m.year FROM movies m WHERE m.title LIKE '" + title + "' ORDER BY m." + sort + ";");        
+        JDBC.PerformQuery("SELECT DISTINCT m.idmovies, m.year FROM movies m WHERE m.title ILIKE '" + title + "' ORDER BY m." + sort + ";");        
         try {                
             while (JDBC.getResultSet().next()) {
                 TemporaryCollection.add(JDBC.getResultSet().getLong("idmovies"));
