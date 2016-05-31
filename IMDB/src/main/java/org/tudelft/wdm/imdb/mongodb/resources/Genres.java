@@ -8,6 +8,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import org.tudelft.wdm.imdb.models.Genre;
 import org.tudelft.wdm.imdb.models.Movie;
 import org.tudelft.wdm.imdb.mongodb.controllers.Controller;
 
@@ -40,5 +41,17 @@ public class Genres {
 		List<Movie> movies = Controller.getMoviesByGenreYearRange(genre, yearNumeric, endYearNumeric);
 		
 		return movies;
+	}
+	
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/stats")
+	public List<Genre> genreStats(@QueryParam("year") String year, @QueryParam("endyear") String endYear) {
+		Integer yearNumeric = Integer.valueOf(year);
+		Integer endYearNumeric = endYear != null ? Integer.valueOf(endYear) : null;
+		
+		List<Genre> stats = Controller.getGenreStats(yearNumeric, endYearNumeric);
+		
+		return stats;
 	}
 }

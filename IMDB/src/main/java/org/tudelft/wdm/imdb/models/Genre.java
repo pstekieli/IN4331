@@ -43,7 +43,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement (name = "Genre")
 public class Genre {
     @XmlElement (name = "Genre ID")
-    private final long idGenre;
+    private final Long idGenre;
     @XmlElement (name = "Name")
     private final String Label;    
     
@@ -54,7 +54,7 @@ public class Genre {
     @XmlElement (name = "Number Of Movies")
     private Integer Statistic = null;
     
-    public Genre(long idGenre, String Label) {
+    public Genre(Long idGenre, String Label) {
         this.Label = Label;
         this.idGenre = idGenre;
     }

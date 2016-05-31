@@ -9,6 +9,7 @@ import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 import org.tudelft.wdm.imdb.models.Actor;
+import org.tudelft.wdm.imdb.models.Genre;
 import org.tudelft.wdm.imdb.models.Movie;
 
 import com.mongodb.BasicDBObject;
@@ -312,7 +313,6 @@ public class Controller {
     	initMongoDB();
     	
     	BasicDBObject yearQuery = new BasicDBObject("$gte", yearStart);
-    	
     	if (yearEnd != null) {
     		yearQuery.append("$lte", yearEnd);
 		}
@@ -332,5 +332,36 @@ public class Controller {
     	}
     	
     	return movies;
+    }
+    
+    public static List<Genre> getGenreStats(Integer yearStart, Integer yearEnd) {
+    	initMongoDB();
+    	
+    	// Build aggregation pipeline
+    	BasicDBObject yearQuery = new BasicDBObject("$gte", yearStart);
+    	if (yearEnd != null) {
+    		yearQuery.append("$lte", yearEnd);
+		}
+    	
+    	List<DBObject> pipeline = new ArrayList<DBObject>();
+    	
+    	BasicDBObject matching = new BasicDBObject("$match", new BasicDBObject("year", yearQuery));
+    	BasicDBObject unwind = new BasicDBObject("$unwind", "$genres");
+    	BasicDBObject group = new BasicDBObject("$group", new BasicDBObject("_id", "$genres").append("count", new BasicDBObject("$sum", 1)));
+    	
+    	pipeline.add(matching);
+    	pipeline.add(unwind);
+    	pipeline.add(group);
+    	
+    	// Build results list
+    	List<Genre> genres = new ArrayList<Genre>();
+    	
+    	for (DBObject document : moviesCollection.aggregate(pipeline).results()) {			
+			Genre genre = new Genre(null, (String) document.get("_id"));
+			genre.SetStatistic((Integer) document.get("count"));
+			genres.add(genre);
+    	}
+    	
+    	return genres;
     }
 }
