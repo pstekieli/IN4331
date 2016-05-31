@@ -55,6 +55,14 @@ public class Controller {
         }
     }
     
+    private static Movie createMovieObject(DBObject document) {
+    	return new Movie(
+			(Integer) document.get("idmovies"), 
+            document.get("title").toString(),
+            document.get("year") != null && document.get("year") instanceof Integer ? (Integer) document.get("year") : null
+    	);
+    }
+    
     private static Movie createMovieObject(long id, boolean detailed, boolean onlyMovies) {
     	initMongoDB();
     	
@@ -70,11 +78,7 @@ public class Controller {
             return null;
         } else {
         	// Base data
-            Movie movie = new Movie(
-                (Integer) document.get("idmovies"), 
-                document.get("title").toString(),
-                document.get("year") != null && document.get("year") instanceof Integer ? (Integer) document.get("year") : null
-            );
+            Movie movie = createMovieObject(document);
             
             if (!detailed) return movie;
             
@@ -326,8 +330,7 @@ public class Controller {
     	
     	try (DBCursor movieCursor = moviesCollection.find(query)) {
     		while (movieCursor.hasNext()) {
-    			Movie movie = createMovieObject((Integer) movieCursor.next().get("idmovies"), true, false);
-    			movies.add(movie);
+    			movies.add(createMovieObject(movieCursor.next()));
     		}
     	}
     	
