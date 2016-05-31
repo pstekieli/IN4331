@@ -201,10 +201,19 @@ public class Controller {
         	}
         	
         	// Sort movies by year and add them to the result (most recent first)
+        	// Movies without a year are placed first because they're likely future projects
         	movies.sort(new Comparator<Movie>() {
 				@Override
 				public int compare(Movie o1, Movie o2) {
-					return -o1.getYear().compareTo(o2.getYear());
+					if (o1.getYear() != null && o2.getYear() != null) {
+						return -o1.getYear().compareTo(o2.getYear());
+					} else if (o2.getYear() == null) {
+						return 1;
+					} else if (o1.getYear() == null) {
+						return -1;
+					} else {
+						return 0;
+					}
 				}
 			});
         	
