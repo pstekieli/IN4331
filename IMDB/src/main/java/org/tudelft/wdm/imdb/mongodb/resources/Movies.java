@@ -20,11 +20,10 @@ import org.tudelft.wdm.imdb.mongodb.controllers.Controller;
 @Path("mongodb/movies")
 public class Movies {
     /**
-     * Retrieve a single movie by its id. An empty document is returned if the
-     * id does not match any movie.
+     * Retrieve a single movie by its id.
      * 
      * @param id Id of movie.
-     * @return Movie details or empty document.
+     * @return Movie details or nothing.
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -34,12 +33,12 @@ public class Movies {
     }
     
     /**
-     * Retrieve matching movies by a (partial) title. An empty document is
+     * Retrieve matching movies by a (partial) title. An empty list is
      * returned if no movie titles meet the specified query.
      * 
      * @param title Title or substring of movie title.
      * @param year Optional filter for a specific year.
-     * @return Movie details or empty document.
+     * @return List of movie details.
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)

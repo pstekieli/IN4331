@@ -105,14 +105,8 @@ public class Controller {
             try (DBCursor actorCursor = actedInCollection.find(new BasicDBObject("idmovies", id))) {
             	while (actorCursor.hasNext()) {
             		DBObject actedInDocument = actorCursor.next();
-            		DBObject actorDocument = actorsCollection.findOne(new BasicDBObject("idactors", actedInDocument.get("idactors")));
             		
-            		Actor actor = new Actor(
-            			(Integer) actedInDocument.get("idactors"),
-            			(String) actorDocument.get("fname"),
-            			(String) actorDocument.get("lname"),
-            			getActorGender(actorDocument)
-            		);
+            		Actor actor = createActorObject((Integer) actedInDocument.get("idactors"), false); 
             		
             		if (actedInDocument.get("character") instanceof String && ((String) actedInDocument.get("character")).length() > 0) {
             			actor.SetRole((String) actedInDocument.get("character"));
@@ -169,7 +163,7 @@ public class Controller {
 		return gender;
     }
     
-    private static Actor createActorObject(long id) {
+    private static Actor createActorObject(long id, boolean detailed) {
     	initMongoDB();
     	
     	BasicDBObject query = new BasicDBObject("idactors", id);
@@ -185,6 +179,8 @@ public class Controller {
         		(String) document.get("lname"),
         		getActorGender(document)
 			);
+        	
+        	if (!detailed) return actor;
         	
         	// List movies
         	List<Movie> movies = new ArrayList<Movie>();
@@ -226,6 +222,30 @@ public class Controller {
     }
     
     public static Actor getActorById(long id) {
-    	return createActorObject(id);
+    	return createActorObject(id, true);
+    }
+    
+    public static List<Actor> getActorsByName(String firstName, String lastName) {
+    	initMongoDB();
+    	
+    	BasicDBObject query = new BasicDBObject();
+    	
+    	if (firstName != null) {
+    		query.append("fname", new BasicDBObject("$regex", Pattern.compile(firstName, Pattern.CASE_INSENSITIVE | Pattern.LITERAL)));
+    	}
+    	
+    	if (lastName != null) {
+    		query.append("lname", new BasicDBObject("$regex", Pattern.compile(lastName, Pattern.CASE_INSENSITIVE | Pattern.LITERAL)));
+    	}
+    	
+    	List<Actor> actors = new ArrayList<Actor>();
+    	
+    	try (DBCursor actorCursor = actorsCollection.find(query)) {
+    		while (actorCursor.hasNext()) {
+    			actors.add(createActorObject((Integer) actorCursor.next().get("idactors"), true));
+    		}
+    	}
+    	
+    	return actors;
     }
 }
