@@ -2,6 +2,7 @@ package org.tudelft.wdm.imdb.mongodb.controllers;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -22,7 +23,7 @@ import com.mongodb.MongoClient;
  *
  * Controllers for the MongoDB movie APIs.
  */
-public class MovieController {
+public class Controller {
     private static MongoClient mongoClient = null;
     private static DB imdbDatabase = null;
     private static DBCollection moviesCollection = null;
@@ -34,7 +35,7 @@ public class MovieController {
     private static DBCollection actedInCollection = null;
     private static DBCollection actorsCollection = null;
 
-    private MovieController() {}
+    private Controller() {}
 
     private static void initMongoDB() {
         try {
@@ -53,10 +54,15 @@ public class MovieController {
         }
     }
     
-    private static Movie createMovieObject(long id) {
+    private static Movie createMovieObject(long id, boolean detailed, boolean onlyMovies) {
     	initMongoDB();
     	
     	BasicDBObject query = new BasicDBObject("idmovies", id);
+    	
+    	if (onlyMovies) {
+    		query.append("type", 3);
+    	}
+    	
         DBObject document = moviesCollection.findOne(query);
         
         if (document == null) {
@@ -68,6 +74,8 @@ public class MovieController {
                 (String) document.get("title"),
                 document.get("year") != null && document.get("year") instanceof Integer ? (Integer) document.get("year") : null
             );
+            
+            if (!detailed) return movie;
             
             // Add name of the series - if any
             DBObject seriesDocument = seriesCollection.findOne(new BasicDBObject("idmovies", id));
@@ -99,17 +107,11 @@ public class MovieController {
             		DBObject actedInDocument = actorCursor.next();
             		DBObject actorDocument = actorsCollection.findOne(new BasicDBObject("idactors", actedInDocument.get("idactors")));
             		
-            		// Gender in the MongoDB database is a string if female or the integer 1 if male
-            		String gender = "female";
-            		if (actorDocument.get("gender") instanceof Integer) {
-            			gender = "male";
-            		}
-            		
             		Actor actor = new Actor(
-            			null,
+            			(Integer) actedInDocument.get("idactors"),
             			(String) actorDocument.get("fname"),
             			(String) actorDocument.get("lname"),
-            			gender
+            			getActorGender(actorDocument)
             		);
             		
             		if (actedInDocument.get("character") instanceof String && ((String) actedInDocument.get("character")).length() > 0) {
@@ -134,7 +136,7 @@ public class MovieController {
     }
 
     public static Movie getMovieById(long id) {
-        return createMovieObject(id);
+        return createMovieObject(id, true, true);
     }
     
     public static List<Movie> getMoviesByTitleYear(String title, Integer year) {
@@ -151,10 +153,70 @@ public class MovieController {
     	
     	try (DBCursor movieCursor = moviesCollection.find(query)) {
     		while (movieCursor.hasNext()) {
-    			movies.add(createMovieObject((Integer) movieCursor.next().get("idmovies")));
+    			movies.add(createMovieObject((Integer) movieCursor.next().get("idmovies"), true, true));
     		}
     	}
     	
     	return movies;
+    }
+    
+    private static String getActorGender(DBObject actorDocument) {
+    	// Gender in the MongoDB database is a string if female or the integer 1 if male
+    	String gender = "female";
+		if (actorDocument.get("gender") instanceof Integer) {
+			gender = "male";
+		}
+		return gender;
+    }
+    
+    private static Actor createActorObject(long id) {
+    	initMongoDB();
+    	
+    	BasicDBObject query = new BasicDBObject("idactors", id);
+        DBObject document = actorsCollection.findOne(query);
+        
+        if (document == null) {
+        	return null;
+        } else {
+        	// Base data
+        	Actor actor = new Actor(
+        		(Integer) document.get("idactors"),
+        		(String) document.get("fname"),
+        		(String) document.get("lname"),
+        		getActorGender(document)
+			);
+        	
+        	// List movies
+        	List<Movie> movies = new ArrayList<Movie>();
+        	
+        	try (DBCursor actedInCursor = actedInCollection.find(new BasicDBObject("idactors", id))) {
+        		while (actedInCursor.hasNext()) {
+        			// Only list actual movies
+        			Movie movie = createMovieObject((Integer) actedInCursor.next().get("idmovies"), false, true);
+        			
+        			if (movie != null) {
+        				movies.add(movie);
+        			}
+        		}
+        	}
+        	
+        	// Sort movies by year and add them to the result (most recent first)
+        	movies.sort(new Comparator<Movie>() {
+				@Override
+				public int compare(Movie o1, Movie o2) {
+					return -o1.getYear().compareTo(o2.getYear());
+				}
+			});
+        	
+        	for (Movie movie : movies) {
+        		actor.AddMovie(movie);
+        	}
+        	
+        	return actor;
+        }
+    }
+    
+    public static Actor getActorById(long id) {
+    	return createActorObject(id);
     }
 }

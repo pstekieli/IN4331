@@ -62,7 +62,7 @@ public class Actor {
     @XmlElement (name = "Number Of Movies")
     private Integer Statistic = null;
     
-    public Actor(Long idActor, String FirstName, String LastName, String Gender) {
+    public Actor(long idActor, String FirstName, String LastName, String Gender) {
         this.idActor = idActor;
         this.FirstName = FirstName;
         this.LastName = LastName;

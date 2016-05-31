@@ -74,6 +74,10 @@ public class Movie {
         this.Year = Year;       
     }  
     
+    public Integer getYear() {
+    	return Year;
+    }
+    
     public void AddReference(Link Link) {
         if (References == null) {
             References = new ArrayList<>();
