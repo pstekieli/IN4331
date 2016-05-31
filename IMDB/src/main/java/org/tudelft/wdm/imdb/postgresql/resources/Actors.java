@@ -60,7 +60,7 @@ public class Actors {
     
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public ArrayList<Actor> getAllActors(@QueryParam("offset") String offset, @QueryParam("orderby") String sort, @QueryParam("fname") String fname, @QueryParam("lname") String lname) {         
+    public ArrayList<Actor> getAllActors(@QueryParam("offset") String offset, @QueryParam("orderby") String sort, @QueryParam("firstname") String fname, @QueryParam("lastname") String lname) {         
         ActorController ActorController = new ActorController();        
         /* ---------------------PARSE WHAT POSSIBLE------------------------ */
         Long voffset = null;             
