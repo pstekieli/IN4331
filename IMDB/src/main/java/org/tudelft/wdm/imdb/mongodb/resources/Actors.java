@@ -56,4 +56,11 @@ public class Actors {
 		
 		return actors;
 	}
+	
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/{actorId}/stats")
+	public Actor actorByIdStatistics(@PathParam("actorId") String id) {
+		return Controller.getActorByIdStats(Long.parseLong(id));
+	}
 }

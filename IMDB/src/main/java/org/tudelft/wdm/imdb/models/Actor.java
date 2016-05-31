@@ -50,7 +50,7 @@ public class Actor {
     @XmlElement (name = "Last Name")
     private final String LastName;
     @XmlElement (name = "Gender ID")
-    private final String Gender;
+    private String Gender;
     
     @XmlElement (name = "Role")
     private String Role;
@@ -67,6 +67,10 @@ public class Actor {
         this.FirstName = FirstName;
         this.LastName = LastName;
         this.Gender = Gender;
+    }
+    
+    public void SetGender(String gender) {
+    	this.Gender = gender;
     }
     
     public void AddReference(Link Link) {

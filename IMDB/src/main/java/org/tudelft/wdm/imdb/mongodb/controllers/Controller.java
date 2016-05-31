@@ -225,6 +225,35 @@ public class Controller {
     	return createActorObject(id, true);
     }
     
+    public static Actor getActorByIdStats(long id) {
+    	Actor actor = createActorObject(id, false);
+    	
+    	if (actor == null) {
+    		return null;
+    	}
+    	
+    	// Not specified to be returned in assignment
+    	actor.SetGender(null);
+    	
+    	// Look up number of movies that actor has starred in
+    	// We're not using count() here because we need to check if a referenced idmovie is actually a movie
+    	int movieCount = 0;
+    	
+    	try (DBCursor actedInCursor = actedInCollection.find(new BasicDBObject("idactors", id))) {
+    		while (actedInCursor.hasNext()) {
+    			Movie movie = createMovieObject((Integer) actedInCursor.next().get("idmovies"), false, true);
+    			
+    			if (movie != null) {
+    				movieCount++;
+    			}
+    		}
+    	}
+    	
+    	actor.SetStatistic(movieCount);
+    	
+    	return actor;
+    }
+    
     public static List<Actor> getActorsByName(String firstName, String lastName) {
     	initMongoDB();
     	
