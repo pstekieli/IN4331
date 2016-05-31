@@ -57,10 +57,42 @@ public class Actors {
 		return actors;
 	}
 	
+	/**
+	 * Retrieve short actor statistics by id.
+	 * Returns just the name and the number of movies.
+	 * 
+	 * @param id Id of actor.
+	 * @return Actor object with name and number of movies.
+	 */
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("/{actorId}/stats")
 	public Actor actorByIdStatistics(@PathParam("actorId") String id) {
 		return Controller.getActorByIdStats(Long.parseLong(id));
+	}
+	
+	/**
+	 * Retrieve matching actors by a first name and/or
+	 * last name. An empty list is returned if no actors
+	 * meet the specified query.
+	 * 
+	 * If no part of a name is specified, then an empty
+	 * list is returned.
+	 * 
+	 * @param firstName (Partial) first name of actor.
+	 * @param lastName (Partial) last name of actor.
+	 * @return List of short actor statistics.
+	 */
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/stats")
+	public List<Actor> actorByNameStatistics(@QueryParam("firstname") String firstName, @QueryParam("lastname") String lastName) {
+		if (firstName == null && lastName == null) {
+			return new ArrayList<Actor>();
+		}
+		
+		List<Actor> actors = Controller.getActorsByNameStats(firstName, lastName);
+		
+		return actors;
 	}
 }

@@ -69,6 +69,10 @@ public class Actor {
         this.Gender = Gender;
     }
     
+    public long GetId() {
+    	return idActor;
+    }
+    
     public void SetGender(String gender) {
     	this.Gender = gender;
     }

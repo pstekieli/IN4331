@@ -225,6 +225,23 @@ public class Controller {
     	return createActorObject(id, true);
     }
     
+    public static int getNumberOfMovies(long actorId) {
+    	int movieCount = 0;
+    	
+    	// We're not using count() here because we need to check if a referenced idmovie is actually a movie
+    	try (DBCursor actedInCursor = actedInCollection.find(new BasicDBObject("idactors", actorId))) {
+    		while (actedInCursor.hasNext()) {
+    			Movie movie = createMovieObject((Integer) actedInCursor.next().get("idmovies"), false, true);
+    			
+    			if (movie != null) {
+    				movieCount++;
+    			}
+    		}
+    	}
+    	
+    	return movieCount;
+    }
+    
     public static Actor getActorByIdStats(long id) {
     	Actor actor = createActorObject(id, false);
     	
@@ -236,20 +253,7 @@ public class Controller {
     	actor.SetGender(null);
     	
     	// Look up number of movies that actor has starred in
-    	// We're not using count() here because we need to check if a referenced idmovie is actually a movie
-    	int movieCount = 0;
-    	
-    	try (DBCursor actedInCursor = actedInCollection.find(new BasicDBObject("idactors", id))) {
-    		while (actedInCursor.hasNext()) {
-    			Movie movie = createMovieObject((Integer) actedInCursor.next().get("idmovies"), false, true);
-    			
-    			if (movie != null) {
-    				movieCount++;
-    			}
-    		}
-    	}
-    	
-    	actor.SetStatistic(movieCount);
+    	actor.SetStatistic(getNumberOfMovies(id));
     	
     	return actor;
     }
@@ -272,6 +276,32 @@ public class Controller {
     	try (DBCursor actorCursor = actorsCollection.find(query)) {
     		while (actorCursor.hasNext()) {
     			actors.add(createActorObject((Integer) actorCursor.next().get("idactors"), true));
+    		}
+    	}
+    	
+    	return actors;
+    }
+    
+    public static List<Actor> getActorsByNameStats(String firstName, String lastName) {
+    	initMongoDB();
+    	
+    	BasicDBObject query = new BasicDBObject();
+    	
+    	if (firstName != null) {
+    		query.append("fname", new BasicDBObject("$regex", Pattern.compile(firstName, Pattern.CASE_INSENSITIVE | Pattern.LITERAL)));
+    	}
+    	
+    	if (lastName != null) {
+    		query.append("lname", new BasicDBObject("$regex", Pattern.compile(lastName, Pattern.CASE_INSENSITIVE | Pattern.LITERAL)));
+    	}
+    	
+    	List<Actor> actors = new ArrayList<Actor>();
+    	
+    	try (DBCursor actorCursor = actorsCollection.find(query)) {
+    		while (actorCursor.hasNext()) {
+    			Actor actor = createActorObject((Integer) actorCursor.next().get("idactors"), true);
+    			actor.SetStatistic(getNumberOfMovies(actor.GetId()));
+    			actors.add(actor);
     		}
     	}
     	
