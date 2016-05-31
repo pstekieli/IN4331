@@ -71,7 +71,7 @@ public class Controller {
         	// Base data
             Movie movie = new Movie(
                 (Integer) document.get("idmovies"), 
-                (String) document.get("title"),
+                document.get("title").toString(),
                 document.get("year") != null && document.get("year") instanceof Integer ? (Integer) document.get("year") : null
             );
             
@@ -306,5 +306,31 @@ public class Controller {
     	}
     	
     	return actors;
+    }
+    
+    public static List<Movie> getMoviesByGenreYearRange(String genre, Integer yearStart, Integer yearEnd) {
+    	initMongoDB();
+    	
+    	BasicDBObject yearQuery = new BasicDBObject("$gte", yearStart);
+    	
+    	if (yearEnd != null) {
+    		yearQuery.append("$lte", yearEnd);
+		}
+    	
+    	BasicDBObject query =
+    			new BasicDBObject("type", 3)
+    			.append("genres", genre)
+    			.append("year", yearQuery);
+    	
+    	List<Movie> movies = new ArrayList<Movie>();
+    	
+    	try (DBCursor movieCursor = moviesCollection.find(query)) {
+    		while (movieCursor.hasNext()) {
+    			Movie movie = createMovieObject((Integer) movieCursor.next().get("idmovies"), true, false);
+    			movies.add(movie);
+    		}
+    	}
+    	
+    	return movies;
     }
 }
