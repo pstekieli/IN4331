@@ -1,0 +1,15 @@
+These indexes should be created:
+
+db.acted_in.ensureIndex({idmovies: 1})
+db.acted_in.ensureIndex({idactors: 1})
+db.actors.ensureIndex({idactors: 1})
+db.genres.ensureIndex({idgenres: 1})
+db.keywords.ensureIndex({idkeywords: 1})
+db.movies.ensureIndex({idmovies: 1})
+db.movies.ensureIndex({year: 1})
+db.movies.ensureIndex({genres: 1})
+db.movies.ensureIndex({year: 1, genres: 1})
+db.movies.ensureIndex({genres: 1, year: 1})
+db.movies_genres.ensureIndex({idmovies: 1})
+db.movies_keywords.ensureIndex({idmovies: 1})
+db.series.ensureIndex({idmovies: 1})
