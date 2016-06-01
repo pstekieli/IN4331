@@ -200,17 +200,25 @@ public class Controller {
         	
         	if (!detailed) return actor;
         	
-        	// List movies
-        	List<Movie> movies = new ArrayList<Movie>();
+        	// Get a list of the movie indices in which this actor played
+        	List<Integer> movieIndices = new ArrayList<Integer>();
         	
         	try (DBCursor actedInCursor = actedInCollection.find(new BasicDBObject("idactors", id))) {
         		while (actedInCursor.hasNext()) {
-        			// Only list actual movies
-        			Movie movie = createMovieObject((Integer) actedInCursor.next().get("idmovies"), false, true);
-        			
-        			if (movie != null) {
-        				movies.add(movie);
-        			}
+        			movieIndices.add((Integer) actedInCursor.next().get("idmovies"));
+        		}
+        	}
+        	
+        	// Look up the actual movies
+        	BasicDBObject moviesQuery =
+    			new BasicDBObject("type", 3)
+    			.append("idmovies", new BasicDBObject("$in", movieIndices));
+        	
+        	List<Movie> movies = new ArrayList<Movie>();
+        	
+        	try (DBCursor movieCursor = moviesCollection.find(moviesQuery)) {
+        		while (movieCursor.hasNext()) {
+        			movies.add(createMovieObject(movieCursor.next()));
         		}
         	}
         	
