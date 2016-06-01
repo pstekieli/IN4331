@@ -111,7 +111,7 @@ public class Controller {
             	while (actorCursor.hasNext()) {
             		DBObject actedInDocument = actorCursor.next();
             		
-            		Actor actor = createActorObject((Integer) actedInDocument.get("idactors"), false); 
+            		Actor actor = createActorObject(actedInDocument);
             		
             		if (actedInDocument.get("character") instanceof String && ((String) actedInDocument.get("character")).length() > 0) {
             			actor.SetRole((String) actedInDocument.get("character"));
@@ -152,7 +152,11 @@ public class Controller {
     	
     	try (DBCursor movieCursor = moviesCollection.find(query)) {
     		while (movieCursor.hasNext()) {
-    			movies.add(createMovieObject((Integer) movieCursor.next().get("idmovies"), true, true));
+    			DBObject doc = movieCursor.next();
+    			
+    			if ((Integer) doc.get("type") == 3) {
+    				movies.add(createMovieObject(doc));
+    			}
     		}
     	}
     	
@@ -166,6 +170,15 @@ public class Controller {
 			gender = "male";
 		}
 		return gender;
+    }
+    
+    private static Actor createActorObject(DBObject document) {
+    	return new Actor(
+    		(Integer) document.get("idactors"),
+    		(String) document.get("fname"),
+    		(String) document.get("lname"),
+    		getActorGender(document)
+		);
     }
     
     private static Actor createActorObject(long id, boolean detailed) {
@@ -231,20 +244,21 @@ public class Controller {
     }
     
     public static int getNumberOfMovies(long actorId) {
-    	int movieCount = 0;
+    	// First build a list of all movie indices that the actor has acted in
+    	List<Integer> movieIndices = new ArrayList<Integer>();
     	
-    	// We're not using count() here because we need to check if a referenced idmovie is actually a movie
     	try (DBCursor actedInCursor = actedInCollection.find(new BasicDBObject("idactors", actorId))) {
     		while (actedInCursor.hasNext()) {
-    			Movie movie = createMovieObject((Integer) actedInCursor.next().get("idmovies"), false, true);
-    			
-    			if (movie != null) {
-    				movieCount++;
-    			}
+    			movieIndices.add((Integer) actedInCursor.next().get("idmovies"));
     		}
     	}
     	
-    	return movieCount;
+    	// Now find how many movies match those indices and are actually movies (type = 3)
+    	BasicDBObject query =
+			new BasicDBObject("type", 3)
+			.append("idmovies", new BasicDBObject("$in", movieIndices));
+    	
+    	return (int) moviesCollection.count(query);
     }
     
     public static Actor getActorByIdStats(long id) {
@@ -280,7 +294,7 @@ public class Controller {
     	
     	try (DBCursor actorCursor = actorsCollection.find(query)) {
     		while (actorCursor.hasNext()) {
-    			actors.add(createActorObject((Integer) actorCursor.next().get("idactors"), true));
+    			actors.add(createActorObject(actorCursor.next()));
     		}
     	}
     	
@@ -304,7 +318,7 @@ public class Controller {
     	
     	try (DBCursor actorCursor = actorsCollection.find(query)) {
     		while (actorCursor.hasNext()) {
-    			Actor actor = createActorObject((Integer) actorCursor.next().get("idactors"), true);
+    			Actor actor = createActorObject(actorCursor.next());
     			actor.SetStatistic(getNumberOfMovies(actor.GetId()));
     			actors.add(actor);
     		}
