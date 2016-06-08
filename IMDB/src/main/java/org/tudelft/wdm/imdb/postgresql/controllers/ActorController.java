@@ -37,6 +37,7 @@ import org.tudelft.wdm.imdb.models.Movie;
  * @version v0.2 (18.05.2016)
  * @version v0.3s (19.05.2016)
  * @version v0.4 (28.05.2016)
+ * @version v0.5 (08.06.2016)
  * 
  **/
 public class ActorController {
@@ -76,19 +77,19 @@ public class ActorController {
         if (fname != null && lname != null) {
           Query = "SELECT DISTINCT a.idactors, a.fname, a.lname, a.gender "
             + "FROM actors a " 
-            + "WHERE a.fname = '" + fname + "' AND a.lname = '" + lname + "' "      
+            + "WHERE a.fname ILIKE '%" + fname + "%' AND a.lname ILIKE '%" + lname + "%' "      
             + "ORDER BY a." + sort + ";";               
         }
         else if (fname != null && lname == null) {
           Query = "SELECT DISTINCT a.idactors, a.fname, a.lname, a.gender "
             + "FROM actors a " 
-            + "WHERE a.fname = '" + fname + "' "      
+            + "WHERE a.fname ILIKE '%" + fname + "%' "      
             + "ORDER BY a." + sort + ";";    
         }
         else if (fname == null && lname != null) {
           Query = "SELECT DISTINCT a.idactors, a.fname, a.lname, a.gender "
             + "FROM actors a " 
-            + "WHERE a.lname = '" + lname + "' "      
+            + "WHERE a.lname ILIKE '%" + lname + "%' "      
             + "ORDER BY a." + sort + ";";    
         }
         else {

@@ -45,9 +45,9 @@ public class JDBC {
     private static Statement st = null;
     private static ResultSet rs = null;
    
-    private static final String URL = "jdbc:postgresql://localhost/imdb";
+    private static final String URL = "jdbc:postgresql://localhost:6789/imdb";
     private static final String USER = "postgres";
-    private static final String PASSWORD = "ZAQ!2wsx";    
+    private static final String PASSWORD = "1234";    
     
     private static void EstablishConnection() throws ClassNotFoundException {    
         try {            

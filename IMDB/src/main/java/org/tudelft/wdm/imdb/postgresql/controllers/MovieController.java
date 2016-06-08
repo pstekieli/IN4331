@@ -25,6 +25,7 @@ package org.tudelft.wdm.imdb.postgresql.controllers;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.tudelft.wdm.imdb.models.Actor;
@@ -40,6 +41,7 @@ import org.tudelft.wdm.imdb.models.Serie;
  * @version v0.2 (18.05.2016)
  * @version v0.3s (19.05.2016)
  * @version v0.4 (28.05.2016)
+ * @version v0.5 (08.06.2016)
  * 
  **/
 public class MovieController {    
@@ -71,11 +73,22 @@ public class MovieController {
         }
         return TemporaryCollection;
     }    
-    public ArrayList<Long> SetActiveFiltersForCollectionByTitle (String title, String sort) {
+    public ArrayList<Long> SetActiveFiltersForCollectionByTitle (String title, String sort, String syear, String eyear) {
         if (sort == null)
             sort = "year";
         ArrayList<Long> TemporaryCollection = new ArrayList<>();
-        JDBC.PerformQuery("SELECT DISTINCT m.idmovies, m.year FROM movies m WHERE m.title ILIKE '" + title + "' ORDER BY m." + sort + ";");        
+        if (syear == null)
+            JDBC.PerformQuery("SELECT DISTINCT m.idmovies, m.year FROM movies m WHERE m.title ILIKE '%" + title + "%' ORDER BY m." + sort + ";");        
+        else {
+            if (eyear == null) {
+                eyear = Integer.toString(Calendar.getInstance().get(Calendar.YEAR));
+                JDBC.PerformQuery("SELECT DISTINCT m.idmovies, m.year FROM movies m WHERE m.title ILIKE '%" + title + "%' AND m.year >= " + syear + " AND m.year <= " + eyear + " ORDER BY m." + sort + ";");        
+            }
+            else
+                JDBC.PerformQuery("SELECT DISTINCT m.idmovies, m.year FROM movies m WHERE m.title ILIKE '%" + title + "%' AND m.year >= " + syear + " AND m.year <= " + eyear + " ORDER BY m." + sort + ";");        
+        }
+                    
+        
         try {                
             while (JDBC.getResultSet().next()) {
                 TemporaryCollection.add(JDBC.getResultSet().getLong("idmovies"));
@@ -89,14 +102,14 @@ public class MovieController {
         Queries.add("SELECT DISTINCT m.idmovies, m.title, m.year "
             + "FROM movies m "            
             + "WHERE m.idmovies = " + id + ";"); /* Q0 */
-        Queries.add("SELECT DISTINCT a.idactors, a.fname, a.lname, a.gender " +
+        Queries.add("SELECT DISTINCT a.idactors, a.fname, a.lname, a.gender, ai.character, ai.billing_position " +
             "FROM actors a " +
             "JOIN acted_in ai " +
             "ON a.idactors = ai.idactors " +
             "JOIN movies m " +
             "ON m.idmovies = ai.idmovies " +
             "WHERE m.idmovies = " + id + " " +
-            "ORDER BY a.idactors;"); /* Q1 */
+            "ORDER BY ai.billing_position;"); /* Q1 */
         Queries.add("SELECT DISTINCT g.idgenres, g.genre " +
             "FROM genres g " +
             "JOIN movies_genres mg " +
@@ -155,7 +168,9 @@ public class MovieController {
         JDBC.PerformQuery(Queries.get(1));
         try {
             while (JDBC.getResultSet().next()) {
-                movie.AddActor(new Actor(JDBC.getResultSet().getLong("idactors"), JDBC.getResultSet().getString("fname"), JDBC.getResultSet().getString("lname"), JDBC.getResultSet().getString("gender")));    
+                Actor a = new Actor(JDBC.getResultSet().getLong("idactors"), JDBC.getResultSet().getString("fname"), JDBC.getResultSet().getString("lname"), JDBC.getResultSet().getString("gender"));
+                a.SetRole(JDBC.getResultSet().getString("character"));
+                movie.AddActor(a);    
             }
         } 
         catch (SQLException ex) {
