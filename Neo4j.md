@@ -1,16 +1,15 @@
 # Setting up Neo4j database
-The entire database can be downloaded ready-for-use here: https://mega.nz/#!D1hQ1IaA!f8gMlStK1bVXFR7t8Gaw9nI5eWScc1jT5YkB6glxFg4  
+The entire database can be downloaded ready-for-use here: https://mega.nz/#!Tl4TDYLI!wCv-KZIUWhRdHhm8N6a4P039h_XW5EZYyjMs61Ogmhs  
 Username: neo4j  
 Password: 1234
 
-When Neo4j boots it asks the location of the database, simply move the folder to that location. By default on Windows this is: `C:\Users\<User>\Documents\Neo4j`
-
+When Neo4j boots it asks the location of the database, simply move the folder to that location. By default on Windows this is: `C:\Users\<User>\Documents\Neo4j`  
 Neo4j 3.0.1 community edition can be downloaded straight from their own site. Further setup is not required.
 
-Setting up the database from scratch is detailed below.
+Alternatively, continue reading for the full guide on setting up the Neo4j database from scratch.
 
 ### Step 1: Extracting PostgreSQL data
-Extracted using standard copy into csv commands, listed below (of course, paths will need to be adjusted based on OS):
+Extracted using standard copy to CSV commands, listed below (of course, paths will need to be adjusted based on OS):
 
 ```
 COPY acted_in TO 'C:\acted_in.csv' WITH (FORMAT CSV, HEADER);
@@ -20,7 +19,7 @@ COPY aka_titles TO 'C:\aka_titles.csv' WITH (FORMAT CSV, HEADER);
 COPY genres TO 'C:\genres.csv' WITH (FORMAT CSV, HEADER);
 COPY keywords TO 'C:\keywords.csv' WITH (FORMAT CSV, HEADER);
 COPY movies TO 'C:\movies.csv' WITH (FORMAT CSV, HEADER);
-COPY movies_genres TO 'C:\movies_genres.csv'  WITH (FORMAT CSV, HEADER);
+COPY movies_genres TO 'C:\movies_genres.csv' WITH (FORMAT CSV, HEADER);
 COPY movies_keywords TO 'C:\movies_keywords.csv' WITH (FORMAT CSV, HEADER);
 COPY series TO 'C:\series.csv' WITH (FORMAT CSV, HEADER);
 ```
@@ -30,7 +29,7 @@ These files should then be moved into the `import` folder in the Neo4j database 
 ### Step 2: Importing data into Neo4j
 Fairly straight-forward, we import using `PERIODIC COMMIT` statements (note that the number can be left out to let it decide itself when to commit).  
 Important to not forget is to `toInt` or `toFloat` statements, forgetting them means the database is extremely unoptimized as it will import everything as strings.  
-Additionally, one thing you'll notice is that the `acted_in`, `movies_genres` and `movies_keywords` tables aren't imported. These will be represented entirely as relations, not as nodes.
+Additionally, one thing you'll notice is that the `acted_in`, `movies_genres` and `movies_keywords` tables aren't imported. These will be represented entirely as relations, not as nodes. More details on this in the final step.  
 All import statements are listed below:
 
 ```
@@ -85,7 +84,7 @@ number:toInt(row.number)
 
 ### Step 3: Setting up indices
 Next, in order to speed up the database we set up indices.  Indices are only set up for the primary indices of the SQL tables. This is because things such as the foreign keys of the tables will be set up using relationships.  
-The indices/constraints set up are listed below.
+The indices/constraints set up are listed below:
 
 ```
 CREATE CONSTRAINT ON (t:actors) ASSERT t.idactors IS UNIQUE;
@@ -100,15 +99,14 @@ CREATE CONSTRAINT ON (t:series) ASSERT t.idseries IS UNIQUE;
 ### Step 4: Creating the relationships
 Relationships are created using the CSV files as in-between file. This is because of two reasons.  
 Firstly, because the foreign keys weren't stored within the Neo4j nodes, this is because after relationships have been created, we will never need them. Therefore, we use the CSV files which contain these foreign keys to set up the relationships instead of storing the useless data in Neo4j.  
-Secondly, because Neo4j loads the actions of the entire operation into RAM before executing it, when dealing with the `acted_in` table/relationships the RAM will be insufficient and the query will get stuck.
-
-The queries required to create the relationships are listed below.
+Secondly, because Neo4j loads the actions of the entire operation into RAM before executing it, when dealing with the `acted_in` table/relationships the RAM will be insufficient and the query will get stuck.  
+The queries required to create the relationships are listed below:
 
 ```
 USING PERIODIC COMMIT LOAD CSV WITH HEADERS FROM "file:///C:\\acted_in.csv" AS row
 MATCH (a:actors {idactors:toInt(row.idactors)})
 MATCH (b:movies {idmovies:toInt(row.idmovies)})
-CREATE (a)-[:ACTED_CHARACTER {
+MERGE (a)-[:ACTED_CHARACTER {
 character:coalesce(row.character, "N/A"),
 billing_position:coalesce(toInt(row.billing_position), 0)
 }]->(b);
