@@ -51,47 +51,48 @@ public class ActorController {
         Controller.keepOpen();
         ArrayList<Actor> actors = getActors(query);
         for (Actor a : actors){
-            System.out.println("m: " + System.currentTimeMillis());
-            GetMoviesInformation(a, null);
-            System.out.println("a: " + System.currentTimeMillis());
-            GetActorStatistics(a);
+            for (Movie m : GetMoviesInformation(a.GetId(), null))
+                a.AddMovie(m);
+            a.SetStatistic(GetActorStatistics(a.GetId()));
         }
         Controller.forceClose();
         return actors;
     }
     
-    public static void GetMoviesInformation(Actor actor, String sort){
+    public static ArrayList<Movie> GetMoviesInformation(long actorId, String sort){
         if (sort==null || sort.equals("idmovies")){
             sort="";
         } else {
             sort="ORDER BY m."+sort;
         }
-        Statement s = new Statement("MATCH (a:actors {idactors:" + actor.GetId()
+        Statement s = new Statement("MATCH (a:actors {idactors:" + actorId
                 + "})-[:ACTED_CHARACTER]->(m:movies)"
                 + " RETURN DISTINCT m.idmovies, m.title, m.year"
                 + sort
         );
         StatementResult sr = Controller.query(s);
+        Controller.closeConnection();
+        ArrayList<Movie> movies = new ArrayList<>();
         while (sr.hasNext()){
             Record r = sr.next();
-            Movie m = new Movie(
+            movies.add(new Movie(
                     r.get("m.idmovies").asLong(),
                     r.get("m.title").asString(),
-                    r.get("m.year").isNull() ? 0 : r.get("m.year").asInt());
-            actor.AddMovie(m);
+                    r.get("m.year").isNull() ? 0 : r.get("m.year").asInt()));
         }
-        Controller.closeConnection();
+        return movies;
     }
     
-    public static void GetActorStatistics(Actor actor){
-        Statement s = new Statement("MATCH (a:actors {idactors:" + actor.GetId()
+    public static int GetActorStatistics(long actorId){
+        Statement s = new Statement("MATCH (a:actors {idactors:" + actorId
                 + "})-[r:ACTED_CHARACTER]->(m:movies) RETURN COUNT(DISTINCT m.idmovies)"
         );
         StatementResult sr = Controller.query(s);
+        Controller.closeConnection();
         while (sr.hasNext()){
             Record r = sr.next();
-            actor.SetStatistic(r.get("COUNT(DISTINCT m.idmovies)").asInt());
+            return r.get("COUNT(DISTINCT m.idmovies)").asInt();
         }
-        Controller.closeConnection();
+        return 0;
     }
 }

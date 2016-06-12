@@ -10,4 +10,5 @@ package org.tudelft.wdm.imdb.neo4j.controllers;
  * @author Tom
  */
 public class GenreController {
+    
 }

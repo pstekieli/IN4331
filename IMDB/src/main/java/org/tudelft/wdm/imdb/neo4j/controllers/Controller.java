@@ -19,13 +19,14 @@ public class Controller {
     private static boolean keepOpen = false;
     
     public static void establishConnection(){
-        if (session!=null) closeConnection();
+        if (isConnected()) return;
+        else closeConnection();
         driver = GraphDatabase.driver(ADDRESS, AuthTokens.basic(USERNAME, PASSWORD));
         session = driver.session();
     }
     
     public static void closeConnection(){
-        if (session!=null && !keepOpen){
+        if (session!=null && (!keepOpen || !session.isOpen())){
             session.close();
             session = null;
             driver.close();
@@ -34,13 +35,13 @@ public class Controller {
     }
     
     public static StatementResult query(Statement q){
-        if (!isConnected()) establishConnection();
+        establishConnection();
         StatementResult result = session.run(q);
         return result;
     }
     
     public static void keepOpen(){
-        if (!isConnected()) establishConnection();
+        establishConnection();
         keepOpen = true;
     }
     

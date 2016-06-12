@@ -90,9 +90,7 @@ public class Actors {
         Statement s = new Statement("MATCH (a:actors {idactors:" + id
                 + "}) RETURN a.idactors AS id, a.fname AS fname, a.lname AS lname, a.gender AS gender");
         Controller.keepOpen();
-        ArrayList<Actor> actor = ActorController.getActors(s);
-        ActorController.GetMoviesInformation(actor.get(0), sort);
-        ActorController.GetActorStatistics(actor.get(0));
+        ArrayList<Actor> actor = ActorController.getActorsFull(s);
         Controller.forceClose();
         return actor;
     }
@@ -103,23 +101,15 @@ public class Actors {
     public ArrayList<Movie> displayMovies(@PathParam("actorId") Long id, @QueryParam("orderby") String sort){
         Statement s = new Statement("MATCH (a:actors {idactors:" + id
                 + "}) RETURN a.idactors AS id, a.fname AS fname, a.lname AS lname, a.gender AS gender");
-        Controller.keepOpen();
-        ArrayList<Actor> actor = ActorController.getActors(s);
-        ActorController.GetMoviesInformation(actor.get(0), sort);
-        Controller.forceClose();
-        return actor.get(0).displayMovies();
+        return ActorController.GetMoviesInformation(id, sort);
     }
     
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{actorId}/statistics")
-    public Integer displayStatistics(@PathParam("actorId") Long id, @QueryParam("orderby") String sort){
+    public Integer displayStatistics(@PathParam("actorId") Long id){
         Statement s = new Statement("MATCH (a:actors {idactors:" + id
                 + "}) RETURN a.idactors AS id, a.fname AS fname, a.lname AS lname, a.gender AS gender");
-        Controller.keepOpen();
-        ArrayList<Actor> actor = ActorController.getActors(s);
-        ActorController.GetActorStatistics(actor.get(0));
-        Controller.forceClose();
-        return actor.get(0).displayStatistics();
+        return ActorController.GetActorStatistics(id);
     }
 }

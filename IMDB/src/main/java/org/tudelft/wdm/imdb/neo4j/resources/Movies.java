@@ -54,16 +54,16 @@ public class Movies {
         }
         
         String sort_arg;
-        if (sort==null) sort_arg = "id";
+        if (sort==null) sort_arg = "";
         else {
             switch (sort){
                 case "title":
-                case "year": sort_arg = sort; break;
+                case "year": sort_arg = " ORDER BY " + sort; break;
                 case "number":
                 case "type":
                 case "location":
-                case "language": sort_arg = "m." + sort; break;
-                default: sort_arg = "id";
+                case "language": sort_arg = " ORDER BY m." + sort; break;
+                default: sort_arg = "";
             }
         }
         
@@ -83,7 +83,7 @@ public class Movies {
         
         String query = "MATCH (m:movies)" + where
                 + "RETURN m.idmovies AS id, m.title AS title, m.year AS year"
-                + " ORDER BY " + sort_arg
+                + sort_arg
                 + " SKIP " + offset_arg
                 + " LIMIT 10";
         
@@ -106,51 +106,27 @@ public class Movies {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{movieId}/actors")
     public ArrayList<Actor> displayActors(@PathParam("movieId") Long id){
-        Statement s = new Statement("MATCH (m:movies {idmovies:" + id
-                + "}) RETURN m.idmovies AS id, m.title AS title, m.year AS year");
-        Controller.keepOpen();
-        ArrayList<Movie> movie = MovieController.getMovies(s);
-        MovieController.getActorInformation(movie.get(0));
-        Controller.forceClose();
-        return movie.get(0).displayActors();
+        return MovieController.getActorInformation(id);
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{movieId}/genres")
     public ArrayList<Genre> displayGenres(@PathParam("movieId") Long id){
-        Statement s = new Statement("MATCH (m:movies {idmovies:" + id
-                + "}) RETURN m.idmovies AS id, m.title AS title, m.year AS year");
-        Controller.keepOpen();
-        ArrayList<Movie> movie = MovieController.getMovies(s);
-        MovieController.getGenreInformation(movie.get(0));
-        Controller.forceClose();
-        return movie.get(0).displayGenres();
+        return MovieController.getGenreInformation(id);
     }
     
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{movieId}/keywords")
     public ArrayList<Keyword> displayKeywords(@PathParam("movieId") Long id){
-        Statement s = new Statement("MATCH (m:movies {idmovies:" + id
-                + "}) RETURN m.idmovies AS id, m.title AS title, m.year AS year");
-        Controller.keepOpen();
-        ArrayList<Movie> movie = MovieController.getMovies(s);
-        MovieController.getKeywordInformation(movie.get(0));
-        Controller.forceClose();
-        return movie.get(0).displayKeywordObjects();
+        return MovieController.getKeywordInformation(id);
     }
     
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{movieId}/series")
     public ArrayList<Serie> displaySeries(@PathParam("movieId") Long id){
-        Statement s = new Statement("MATCH (m:movies {idmovies:" + id
-                + "}) RETURN m.idmovies AS id, m.title AS title, m.year AS year");
-        Controller.keepOpen();
-        ArrayList<Movie> movie = MovieController.getMovies(s);
-        MovieController.getSeriesInformation(movie.get(0));
-        Controller.forceClose();
-        return movie.get(0).displaySeries();
+        return MovieController.getSeriesInformation(id);
     }
 }

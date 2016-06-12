@@ -50,20 +50,25 @@ public class MovieController {
         Controller.keepOpen();
         ArrayList<Movie> movies = getMovies(query);
         for (Movie m : movies){
-            getActorInformation(m);
-            getGenreInformation(m);
-            getKeywordInformation(m);
-            getSeriesInformation(m);
+            for (Actor a : getActorInformation(m.getId()))
+                m.AddActor(a);
+            for (Genre g : getGenreInformation(m.getId()))
+                m.AddGenre(g);
+            for (Keyword k : getKeywordInformation(m.getId()))
+                m.AddKeywordObject(k);
+            for (Serie s : getSeriesInformation(m.getId()))
+                m.AddSerie(s);
         }
         Controller.forceClose();
         return movies;
     }
     
-    public static boolean getActorInformation(Movie m){
+    public static ArrayList<Actor> getActorInformation(long movieId){
         Statement s = new Statement("MATCH (a:actors)-[r:ACTED_CHARACTER]->(b:movies {idmovies:"
-                + m.getId() + "}) RETURN a.idactors, a.fname, a.lname, a.gender, r.character");
+                + movieId + "}) RETURN a.idactors, a.fname, a.lname, a.gender, r.character");
         StatementResult sr = Controller.query(s);
-        if (!sr.hasNext()) return false;
+        Controller.closeConnection();
+        ArrayList<Actor> actors = new ArrayList<>();
         while (sr.hasNext()){
             Record r = sr.next();
             Actor a = new Actor(
@@ -73,59 +78,58 @@ public class MovieController {
                     r.get("a.gender").isNull() ? null : ""+r.get("a.gender").asInt()
             );
             a.SetRole(r.get("r.character").asString());
-            m.AddActor(a);
+            actors.add(a);
         }
-        Controller.closeConnection();
-        return true;
+        return actors;
     }
     
-    public static boolean getGenreInformation(Movie m){
-        Statement s = new Statement("MATCH (a:movies {idmovies:" + m.getId() + "})-[r:GENRE_OF_MOVIE]->(b:genres)"
+    public static ArrayList<Genre> getGenreInformation(long movieId){
+        Statement s = new Statement("MATCH (a:movies {idmovies:" + movieId + "})-[r:GENRE_OF_MOVIE]->(b:genres)"
                 + " RETURN b.idgenres, b.genre");
         StatementResult sr = Controller.query(s);
-        if (!sr.hasNext()) return false;
+        Controller.closeConnection();
+        ArrayList<Genre> genres = new ArrayList<>();
         while (sr.hasNext()){
             Record r = sr.next();
-            m.AddGenre(new Genre(
+            genres.add(new Genre(
                     r.get("b.idgenres").asLong(),
                     r.get("b.genre").asString()
             ));
         }
-        Controller.closeConnection();
-        return true;
+        return genres;
     }
     
-    public static boolean getKeywordInformation(Movie m){
-        Statement s = new Statement("MATCH (a:movies {idmovies:" + m.getId() + "})-[r:KEYWORD_OF_MOVIE]->(b:keywords)"
+    public static ArrayList<Keyword> getKeywordInformation(long movieId){
+        Statement s = new Statement("MATCH (a:movies {idmovies:" + movieId + "})-[r:KEYWORD_OF_MOVIE]->(b:keywords)"
                 + "RETURN b.idkeywords, b.keyword");
         StatementResult sr = Controller.query(s);
-        if (!sr.hasNext()) return false;
+        Controller.closeConnection();
+        ArrayList<Keyword> keywords = new ArrayList<>();
         while (sr.hasNext()){
             Record r = sr.next();
-            m.AddKeywordObject(new Keyword(
+            keywords.add(new Keyword(
                     r.get("b.idkeywords").asLong(),
                     r.get("b.keyword").asString()
             ));
         }
-        Controller.closeConnection();
-        return true;
+        return keywords;
     }
     
-    public static boolean getSeriesInformation(Movie m){
-        Statement s = new Statement("MATCH (a:movies {idmovies:" + m.getId() + "})-[r:ADAPTED_AS_SERIES]->(b:series)"
+    public static ArrayList<Serie> getSeriesInformation(long movieId){
+        Statement s = new Statement("MATCH (a:movies {idmovies:" + movieId + "})-[r:ADAPTED_AS_SERIES]->(b:series)"
                 + "RETURN b.idseries, b.name, b.season, b.episode");
         StatementResult sr = Controller.query(s);
-        if (!sr.hasNext()) return false;
+        Controller.closeConnection();
+        ArrayList<Serie> series = new ArrayList<>();
         while (sr.hasNext()){
             Record r = sr.next();
-            m.AddSerie(new Serie(
+            series.add(new Serie(
                     r.get("b.idseries").asLong(),
                     r.get("b.name").asString(),
                     r.get("b.season").isNull() ? 0 : r.get("b.season").asInt(),
                     r.get("b.episode").isNull() ? 0 : r.get("b.episode").asInt()
             ));
         }
-        Controller.closeConnection();
-        return true;
+        return series;
     }
 }
