@@ -18,7 +18,6 @@ import org.tudelft.wdm.imdb.models.Genre;
 import org.tudelft.wdm.imdb.models.Keyword;
 import org.tudelft.wdm.imdb.models.Movie;
 import org.tudelft.wdm.imdb.models.Serie;
-import org.tudelft.wdm.imdb.neo4j.controllers.Controller;
 import org.tudelft.wdm.imdb.neo4j.controllers.MovieController;
 
 /**
@@ -49,7 +48,7 @@ public class Movies {
         long offset_arg = 0;
         if (offset!=null){
             try {
-                long l = Long.parseLong(offset);
+                offset_arg = Long.parseLong(offset);
             } catch (NumberFormatException ex){}
         }
         

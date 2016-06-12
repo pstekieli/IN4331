@@ -35,14 +35,13 @@ public class Actors {
      * @param lname
      * @return String that will be returned as a text/plain response.
      */
-    
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public ArrayList<Actor> getAllActors(@QueryParam("offset") String offset, @QueryParam("orderby") String sort, @QueryParam("firstname") String fname, @QueryParam("lastname") String lname){
         long offset_arg = 0;
         if (offset!=null){
             try {
-                long l = Long.parseLong(offset);
+                offset_arg = Long.parseLong(offset);
             } catch (NumberFormatException ex){}
         }
         
@@ -101,7 +100,7 @@ public class Actors {
     public ArrayList<Movie> displayMovies(@PathParam("actorId") Long id, @QueryParam("orderby") String sort){
         Statement s = new Statement("MATCH (a:actors {idactors:" + id
                 + "}) RETURN a.idactors AS id, a.fname AS fname, a.lname AS lname, a.gender AS gender");
-        return ActorController.GetMoviesInformation(id, sort);
+        return ActorController.getMoviesInformation(id, sort);
     }
     
     @GET
@@ -110,6 +109,6 @@ public class Actors {
     public Integer displayStatistics(@PathParam("actorId") Long id){
         Statement s = new Statement("MATCH (a:actors {idactors:" + id
                 + "}) RETURN a.idactors AS id, a.fname AS fname, a.lname AS lname, a.gender AS gender");
-        return ActorController.GetActorStatistics(id);
+        return ActorController.getActorStatistics(id);
     }
 }

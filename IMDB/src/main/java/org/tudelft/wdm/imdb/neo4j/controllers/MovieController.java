@@ -18,6 +18,7 @@ import org.tudelft.wdm.imdb.models.Serie;
  * @author Tom
  */
 public class MovieController {
+    
     /**
      * This function will retrieve only the basic movie data.
      * It is required for the statement to retrieve the id, title and year
@@ -39,6 +40,7 @@ public class MovieController {
         Controller.closeConnection();
         return movies;
     }
+    
     /**
      * This function will retrieve all relevant movie data.
      * It is required for the statement to retrieve the id, title and year

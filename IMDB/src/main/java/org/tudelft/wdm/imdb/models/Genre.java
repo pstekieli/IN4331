@@ -23,6 +23,7 @@
  */
 package org.tudelft.wdm.imdb.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion;
 import java.util.ArrayList;
@@ -40,6 +41,8 @@ import javax.xml.bind.annotation.XmlRootElement;
  * 
  **/
 @JsonSerialize(include = Inclusion.NON_NULL) /* Omit empty ArrayLists */
+//To prevent the getters being used in the JSON output
+@JsonIgnoreProperties({"id"})
 @XmlRootElement (name = "Genre")
 public class Genre {
     @XmlElement (name = "Genre ID")
@@ -57,6 +60,10 @@ public class Genre {
     public Genre(Long idGenre, String Label) {
         this.Label = Label;
         this.idGenre = idGenre;
+    }
+    
+    public Long getId(){
+        return idGenre;
     }
     
     public void AddReference(Link Link) {

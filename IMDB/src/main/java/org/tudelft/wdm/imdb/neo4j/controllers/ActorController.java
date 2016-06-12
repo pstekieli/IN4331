@@ -17,6 +17,7 @@ import org.tudelft.wdm.imdb.models.Movie;
  * @author Tom
  */
 public class ActorController {
+    
     /**
      * This function will retrieve only the basic movie data.
      * It is required for the statement to retrieve the id, fname, lname and gender
@@ -40,6 +41,7 @@ public class ActorController {
         Controller.closeConnection();
         return actors;
     }
+    
     /**
      * This function will retrieve all relevant movie data.
      * It is required for the statement to retrieve the id, title and year
@@ -51,15 +53,15 @@ public class ActorController {
         Controller.keepOpen();
         ArrayList<Actor> actors = getActors(query);
         for (Actor a : actors){
-            for (Movie m : GetMoviesInformation(a.GetId(), null))
+            for (Movie m : getMoviesInformation(a.GetId(), null))
                 a.AddMovie(m);
-            a.SetStatistic(GetActorStatistics(a.GetId()));
+            a.SetStatistic(getActorStatistics(a.GetId()));
         }
         Controller.forceClose();
         return actors;
     }
     
-    public static ArrayList<Movie> GetMoviesInformation(long actorId, String sort){
+    public static ArrayList<Movie> getMoviesInformation(long actorId, String sort){
         if (sort==null || sort.equals("idmovies")){
             sort="";
         } else {
@@ -83,7 +85,7 @@ public class ActorController {
         return movies;
     }
     
-    public static int GetActorStatistics(long actorId){
+    public static int getActorStatistics(long actorId){
         Statement s = new Statement("MATCH (a:actors {idactors:" + actorId
                 + "})-[r:ACTED_CHARACTER]->(m:movies) RETURN COUNT(DISTINCT m.idmovies)"
         );
