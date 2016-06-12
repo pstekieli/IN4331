@@ -16,6 +16,8 @@ public class Controller {
     private static Driver driver = null;
     private static Session session = null;
     
+    private static boolean keepOpen = true;
+    
     public static void establishConnection(){
         if (session!=null) closeConnection();
         driver = GraphDatabase.driver(ADDRESS, AuthTokens.basic(USERNAME, PASSWORD));
@@ -37,9 +39,14 @@ public class Controller {
         return result;
     }
     
-    public static Transaction beginTransaction(){
+    public static void keepOpen(){
         if (!isConnected()) establishConnection();
-        return session.beginTransaction();
+        keepOpen = true;
+    }
+    
+    public static void forceClose(){
+        keepOpen = false;
+        closeConnection();
     }
     
     public static boolean isConnected(){

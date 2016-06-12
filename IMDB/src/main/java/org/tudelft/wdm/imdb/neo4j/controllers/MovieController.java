@@ -19,7 +19,7 @@ import org.tudelft.wdm.imdb.models.Serie;
  */
 public class MovieController {
     /**
-     * This function will retrieve all relevant movie data.
+     * This function will retrieve only the basic movie data.
      * It is required for the statement to retrieve the id, title and year
      * using those exact names.
      * @param query
@@ -34,7 +34,7 @@ public class MovieController {
                     r.get("id").asLong(),
                     r.get("title").asString(),
                     r.get("year").isNull() ? 0 : r.get("year").asInt());
-            movies.add(m);            
+            movies.add(m);
         }
         Controller.closeConnection();
         return movies;
@@ -47,6 +47,7 @@ public class MovieController {
      * @return 
      */
     public static ArrayList<Movie> getMoviesFull(Statement query) {
+        Controller.keepOpen();
         ArrayList<Movie> movies = getMovies(query);
         for (Movie m : movies){
             getActorInformation(m);
@@ -54,22 +55,25 @@ public class MovieController {
             getKeywordInformation(m);
             getSeriesInformation(m);
         }
+        Controller.forceClose();
         return movies;
     }
     
     public static boolean getActorInformation(Movie m){
         Statement s = new Statement("MATCH (a:actors)-[r:ACTED_CHARACTER]->(b:movies {idmovies:"
-                + m.getId() + "}) RETURN a.idactors, a.fname, a.lname, a.gender");
+                + m.getId() + "}) RETURN a.idactors, a.fname, a.lname, a.gender, r.character");
         StatementResult sr = Controller.query(s);
         if (!sr.hasNext()) return false;
         while (sr.hasNext()){
             Record r = sr.next();
-            m.AddActor(new Actor(
+            Actor a = new Actor(
                     r.get("a.idactors").asLong(),
                     r.get("a.fname").asString(),
                     r.get("a.lname").asString(),
                     r.get("a.gender").isNull() ? null : ""+r.get("a.gender").asInt()
-            ));
+            );
+            a.SetRole(r.get("r.character").asString());
+            m.AddActor(a);
         }
         Controller.closeConnection();
         return true;

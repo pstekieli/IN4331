@@ -18,6 +18,7 @@ import org.tudelft.wdm.imdb.models.Genre;
 import org.tudelft.wdm.imdb.models.Keyword;
 import org.tudelft.wdm.imdb.models.Movie;
 import org.tudelft.wdm.imdb.models.Serie;
+import org.tudelft.wdm.imdb.neo4j.controllers.Controller;
 import org.tudelft.wdm.imdb.neo4j.controllers.MovieController;
 
 /**
@@ -41,7 +42,10 @@ public class Movies {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public ArrayList<Movie> getAllMovies(@QueryParam("offset") String offset, @QueryParam("orderby") String sort, @QueryParam("title") String title, @QueryParam("syear") String syear, @QueryParam("eyear") String eyear){
-        
+        // This function is really susceptible to SQL injection, but I can't
+        // figure out just how you're meant to do this stuff safely with the
+        // Neo4j driver so considering the assignment doesn't require safety
+        // from SQL injection, I decided to just ignore the security issues.
         long offset_arg = 0;
         if (offset!=null){
             try {
@@ -104,8 +108,10 @@ public class Movies {
     public ArrayList<Actor> displayActors(@PathParam("movieId") Long id){
         Statement s = new Statement("MATCH (m:movies {idmovies:" + id
                 + "}) RETURN m.idmovies AS id, m.title AS title, m.year AS year");
+        Controller.keepOpen();
         ArrayList<Movie> movie = MovieController.getMovies(s);
         MovieController.getActorInformation(movie.get(0));
+        Controller.forceClose();
         return movie.get(0).displayActors();
     }
 
@@ -115,8 +121,10 @@ public class Movies {
     public ArrayList<Genre> displayGenres(@PathParam("movieId") Long id){
         Statement s = new Statement("MATCH (m:movies {idmovies:" + id
                 + "}) RETURN m.idmovies AS id, m.title AS title, m.year AS year");
+        Controller.keepOpen();
         ArrayList<Movie> movie = MovieController.getMovies(s);
         MovieController.getGenreInformation(movie.get(0));
+        Controller.forceClose();
         return movie.get(0).displayGenres();
     }
     
@@ -126,8 +134,10 @@ public class Movies {
     public ArrayList<Keyword> displayKeywords(@PathParam("movieId") Long id){
         Statement s = new Statement("MATCH (m:movies {idmovies:" + id
                 + "}) RETURN m.idmovies AS id, m.title AS title, m.year AS year");
+        Controller.keepOpen();
         ArrayList<Movie> movie = MovieController.getMovies(s);
         MovieController.getKeywordInformation(movie.get(0));
+        Controller.forceClose();
         return movie.get(0).displayKeywordObjects();
     }
     
@@ -137,8 +147,10 @@ public class Movies {
     public ArrayList<Serie> displaySeries(@PathParam("movieId") Long id){
         Statement s = new Statement("MATCH (m:movies {idmovies:" + id
                 + "}) RETURN m.idmovies AS id, m.title AS title, m.year AS year");
+        Controller.keepOpen();
         ArrayList<Movie> movie = MovieController.getMovies(s);
         MovieController.getSeriesInformation(movie.get(0));
+        Controller.forceClose();
         return movie.get(0).displaySeries();
     }
 }
