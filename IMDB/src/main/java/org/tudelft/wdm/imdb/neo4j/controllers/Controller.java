@@ -16,7 +16,7 @@ public class Controller {
     private static Driver driver = null;
     private static Session session = null;
     
-    private static boolean keepOpen = true;
+    private static boolean keepOpen = false;
     
     public static void establishConnection(){
         if (session!=null) closeConnection();
@@ -25,7 +25,7 @@ public class Controller {
     }
     
     public static void closeConnection(){
-        if (session!=null){
+        if (session!=null && !keepOpen){
             session.close();
             session = null;
             driver.close();
