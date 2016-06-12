@@ -23,6 +23,7 @@
  */
 package org.tudelft.wdm.imdb.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion;
 import java.util.ArrayList;
@@ -40,6 +41,8 @@ import javax.xml.bind.annotation.XmlRootElement;
  * 
  **/
 @JsonSerialize(include = Inclusion.NON_NULL) /* Omit empty ArrayLists */
+//To prevent the getters being used in the JSON output
+@JsonIgnoreProperties({"id","title","year"})
 @XmlRootElement(name = "Movie")
 public class Movie {    
    
@@ -71,8 +74,16 @@ public class Movie {
     public Movie(long idMovie, String Title, Integer Year) {
         this.idMovie = idMovie;
         this.Title = Title;
-        this.Year = Year;       
-    }  
+        this.Year = Year;
+    }
+    
+    public long getId() {
+    	return idMovie;
+    }
+    
+    public String getTitle() {
+    	return Title;
+    }
     
     public Integer getYear() {
     	return Year;
@@ -123,18 +134,22 @@ public class Movie {
     }
     
     public ArrayList<Actor> displayActors() {
+        if (Genres==null) return new ArrayList<>();
         return Actors;
     }
     
     public ArrayList<Genre> displayGenres() {
+        if (Genres==null) return new ArrayList<>();
         return Genres;
     }
     
     public ArrayList<Keyword> displayKeywordObjects() {
+        if (Genres==null) return new ArrayList<>();
         return KeywordObjects;
     }
     
     public ArrayList<Serie> displaySeries() {
+        if (Genres==null) return new ArrayList<>();
         return Series;
     }
     

@@ -59,6 +59,11 @@
             <artifactId>jersey-media-json-jackson</artifactId>
             <version>2.22.2</version>
         </dependency>
+        <dependency>
+            <groupId>org.neo4j.driver</groupId>
+            <artifactId>neo4j-java-driver</artifactId>
+            <version>1.0.2</version>
+        </dependency>
     </dependencies>
     <properties>
         <jersey.version>2.22.2</jersey.version>
