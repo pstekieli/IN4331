@@ -3,14 +3,15 @@ package org.tudelft.wdm.imdb.mongodb.controllers;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 import org.tudelft.wdm.imdb.models.Actor;
 import org.tudelft.wdm.imdb.models.Genre;
 import org.tudelft.wdm.imdb.models.Movie;
+import org.tudelft.wdm.imdb.models.Tuple;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -106,28 +107,57 @@ public class Controller {
             }
             
             // Add list of actors and roles
-            Map<Integer, Actor> actorBillings = new TreeMap<Integer, Actor>();
+            List<Tuple<Integer, Actor>> actorBillings = new ArrayList<Tuple<Integer, Actor>>();
+            List<Integer> actorIndices = new ArrayList<Integer>();
+            
             try (DBCursor actorCursor = actedInCollection.find(new BasicDBObject("idmovies", id))) {
             	while (actorCursor.hasNext()) {
             		DBObject actedInDocument = actorCursor.next();
             		
             		Actor actor = createActorObject(actedInDocument);
             		
+            		actorIndices.add((int) actor.GetId());
+            		
             		if (actedInDocument.get("character") instanceof String && ((String) actedInDocument.get("character")).length() > 0) {
             			actor.SetRole((String) actedInDocument.get("character"));
             		}
             		
             		if (actedInDocument.get("billing_position") instanceof Integer) {
-            			actorBillings.put((Integer) actedInDocument.get("billing_position"), actor);
+            			actorBillings.add(new Tuple<Integer, Actor>((Integer) actedInDocument.get("billing_position"), actor));
             		} else {
-            			actorBillings.put(Integer.MAX_VALUE, actor);
+            			actorBillings.add(new Tuple<Integer, Actor>(Integer.MAX_VALUE, actor));
             		}
             	}
             }
             
+            actorBillings.sort(new Comparator<Tuple<Integer, Actor>>() {
+				@Override
+				public int compare(Tuple<Integer, Actor> a, Tuple<Integer, Actor> b) {
+					return a.x.compareTo(b.x);
+				}
+			});
+            
+            // Resolve actor info
+            BasicDBObject actorsQuery = new BasicDBObject("idactors", new BasicDBObject("$in", actorIndices));
+            Map<Integer, Actor> actorDetails = new HashMap<Integer, Actor>();
+        	
+        	try (DBCursor actorCursor = actorsCollection.find(actorsQuery)) {
+        		while (actorCursor.hasNext()) {
+        			DBObject actor = actorCursor.next();
+        			actorDetails.put((Integer) actor.get("idactors"), createActorObject(actor));
+        		}
+        	}
+            
             // Add the actors to the final list in order of billing position
-            for (Map.Entry<Integer, Actor> entry : actorBillings.entrySet()) {
-            	movie.AddActor(entry.getValue());
+        	for (Tuple<Integer, Actor> entry : actorBillings) {
+            	if (actorDetails.containsKey((int) entry.y.GetId())) {
+            		Actor actorDetailed = actorDetails.get((int) entry.y.GetId());
+            		entry.y.FirstName = actorDetailed.FirstName;
+            		entry.y.LastName = actorDetailed.LastName;
+            		entry.y.SetGender(actorDetailed.Gender);
+            	}
+            	
+            	movie.AddActor(entry.y);
             }
             
             return movie;

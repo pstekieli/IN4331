@@ -47,11 +47,11 @@ public class Actor {
     @XmlElement (name = "Actor ID")
     private final Long idActor;
     @XmlElement (name = "First Name")
-    private final String FirstName;
+    public String FirstName;
     @XmlElement (name = "Last Name")
-    private final String LastName;
+    public String LastName;
     @XmlElement (name = "Gender ID")
-    private String Gender;
+    public String Gender;
     
     @XmlElement (name = "Role")
     private String Role;
