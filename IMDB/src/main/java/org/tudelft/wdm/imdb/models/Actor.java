@@ -37,6 +37,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @version v0.2 (18.05.2016)
  * @version v0.3s (19.05.2016)
  * @version v0.4 (28.05.2016)
+ * @version v1.0 (19.06.2016)
  * 
  **/
 @JsonSerialize(include = Inclusion.NON_NULL) /* Omit empty ArrayLists */
@@ -66,7 +67,10 @@ public class Actor {
         this.idActor = idActor;
         this.FirstName = FirstName;
         this.LastName = LastName;
-        this.Gender = Gender;
+        if (Gender == null || Gender.equals("female"))
+            this.Gender = "Female";        
+        else
+            this.Gender = "Male";        
     }
     
     public long GetId() {

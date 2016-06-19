@@ -47,6 +47,7 @@ import org.tudelft.wdm.imdb.postgresql.controllers.MovieController;
  * @version v0.3s (19.05.2016)
  * @version v0.4 (28.05.2016)
  * @version v0.5 (08.05.2016)
+ * @version v1.0 (19.06.2016)
  * 
  **/
 @Path("postgresql/movies")
@@ -56,11 +57,11 @@ public class Movies {
      * Method handling HTTP GET requests. The returned object will be sent
      * to the client as "text/plain" media type 
      * 
-     * @param offset
-     * @param sort
-     * @param title
-     * @param syear
-     * @param eyear
+     * @param offset Display results starting at ID
+     * @param sort Sort results by *sort* value
+     * @param title Search by *title*
+     * @param syear Starting year (syear) for the search
+     * @param eyear Ending year (eyear) for the search
      * @return String that will be returned as a text/plain response.
      */
     @GET
@@ -69,10 +70,14 @@ public class Movies {
         MovieController MovieController = new MovieController();        
         /* ---------------------PARSE WHAT POSSIBLE------------------------ */        
         Long voffset = null;                
-        if (offset != null) {voffset = Long.parseLong(offset);}        
-         /* ----------------------------------------------------------------- */
-        ArrayList<Long> IDs = null;
-        if (title != null) {
+        if (offset != null) {voffset = Long.parseLong(offset);}         
+        /* ----------------------------------------------------------------- */
+        /* ---------------------SECURE INPUT-------------------------------- */        
+        if (!title.isEmpty())
+            title = title.replaceAll("/(//+)([^A-Za-z])", "");         
+        /* ----------------------------------------------------------------- */
+        ArrayList<Long> IDs;
+        if (!title.isEmpty()) {
             IDs = MovieController.SetActiveFiltersForCollectionByTitle(title, sort, syear, eyear);
         } else {              
             IDs = MovieController.SetActiveFiltersForCollection(voffset, sort);

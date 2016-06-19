@@ -38,21 +38,31 @@ import org.tudelft.wdm.imdb.models.Movie;
  * @version v0.3s (19.05.2016)
  * @version v0.4 (28.05.2016)
  * @version v0.5 (08.06.2016)
+ * @version v1.0 (19.06.2016)
  * 
  **/
 public class ActorController {
     
     private final ArrayList<String> Queries = new ArrayList<>();
     private final JDBC JDBC = new JDBC();    
+    private final Long limit = Long.parseLong("10");
+    private Long offset;
+    private String sort;    
     
-    public ArrayList<Long> SetActiveFiltersForCollection(Long offset, String sort) {        
-        /* ---------------------SET DEFAULTS IF NULL------------------------ */
-        Long limit = Long.parseLong("10");
+    public void SetDefaultsIfNull(Long voffset, String vsort) {
+        /* ---------------------SET DEFAULTS IF NULL------------------------ */        
         if (offset == null) 
-            offset = Long.parseLong("0");        
-        if (sort == null)
-            sort = "idactors";
-        /* ----------------------------------------------------------------- */        
+            this.offset = Long.parseLong("0");
+        else
+            this.offset = voffset;
+        if (sort == null || !sort.equals("fname") || !sort.equals("lname"))
+            this.sort = "idactors";
+        else
+            this.sort = vsort;
+        /* ----------------------------------------------------------------- */  
+    }    
+    public ArrayList<Long> SetActiveFiltersForCollection(Long voffset, String vsort) {        
+        SetDefaultsIfNull(voffset, vsort);      
         String Query = "SELECT DISTINCT a.idactors, a.fname, a.lname, a.gender "
             + "FROM actors a "            
             + "ORDER BY a." + sort + " " 
@@ -68,12 +78,9 @@ public class ActorController {
         }
         return TemporaryCollection;
     }  
-    public ArrayList<Long> SetActiveFiltersForCollectionByName(String fname, String lname, String sort) {        
-        /* ---------------------SET DEFAULTS IF NULL------------------------ */               
-        if (sort == null)
-            sort = "idactors";
-        /* ----------------------------------------------------------------- */
-        String Query = null;
+    public ArrayList<Long> SetActiveFiltersForCollectionByName(String fname, String lname, String vsort) {        
+        SetDefaultsIfNull(null, vsort);
+        String Query;
         if (fname != null && lname != null) {
           Query = "SELECT DISTINCT a.idactors, a.fname, a.lname, a.gender "
             + "FROM actors a " 
@@ -123,6 +130,9 @@ public class ActorController {
                 "ORDER BY m.idmovies;");
         }
         else {
+            if (!sort.equals("idmovies") && !sort.equals("title") && !sort.equals("year")) {
+                sort = "title";
+            }
             Queries.add("SELECT DISTINCT m.idmovies, m.title, m.year " +
                 "FROM movies m " +
                 "JOIN acted_in ai " +

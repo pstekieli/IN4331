@@ -42,6 +42,7 @@ import org.tudelft.wdm.imdb.postgresql.controllers.ActorController;
  * @version v0.2 (18.05.2016)
  * @version v0.3s (19.05.2016)
  * @version v0.4 (28.05.2016)
+ * @version v1.0 (19.06.2016)
  * 
  **/
 @Path("postgresql/actors")
@@ -51,10 +52,10 @@ public class Actors {
      * Method handling HTTP GET requests. The returned object will be sent
      * to the client as "text/plain" media type.
      *
-     * @param offset
-     * @param sort
-     * @param fname
-     * @param lname
+     * @param offset Setting offset for output OFFSET + 10
+     * @param sort Sorting output by *sort*
+     * @param fname Finding actors by their first name
+     * @param lname Finding actors by their last name
      * @return String that will be returned as a text/plain response.
      */
     
@@ -65,8 +66,14 @@ public class Actors {
         /* ---------------------PARSE WHAT POSSIBLE------------------------ */
         Long voffset = null;             
         if (offset != null) {voffset = Long.parseLong(offset);}             
-         /* ----------------------------------------------------------------- */          
-        ArrayList<Long> IDs = null;
+        /* ----------------------------------------------------------------- */
+        /* ---------------------SECURE INPUT-------------------------------- */        
+        if (!fname.isEmpty())
+            fname = fname.replaceAll("[^A-Za-z]", "");
+        if (!lname.isEmpty())
+            lname = lname.replaceAll("[^A-Za-z]", "");
+        /* ----------------------------------------------------------------- */
+        ArrayList<Long> IDs;
         if (fname == null && lname == null) {
             IDs = ActorController.SetActiveFiltersForCollection(voffset, sort);
         } else {              
@@ -78,7 +85,7 @@ public class Actors {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{actorId}")
-    public ArrayList<Actor> displayDetailed(@PathParam("actorId") Long id, @QueryParam("details") String details, @QueryParam("orderby") String sort) {        
+    public ArrayList<Actor> displayDetailed(@PathParam("actorId") Long id, @QueryParam("orderby") String sort) {        
         ActorController ActorController = new ActorController();        
         ArrayList<Long> single = new ArrayList<>();
         single.add(id);        

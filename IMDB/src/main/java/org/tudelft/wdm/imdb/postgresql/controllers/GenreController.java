@@ -39,23 +39,29 @@ import org.tudelft.wdm.imdb.models.Movie;
  * @version v0.2 (18.05.2016)
  * @version v0.3s (19.05.2016)
  * @version v0.4 (28.05.2016)
+ * @version v1.0 (19.06.2016)
  * 
  **/
 public class GenreController {
     private final ArrayList<String> Queries = new ArrayList<>();
     private final JDBC JDBC = new JDBC();    
     
-    public ArrayList<Genre> SetActiveFiltersForCollection(String sort) {        
+    public ArrayList<Genre> SetActiveFiltersForCollection(String sort, Integer year, Integer endyear) {        
         /* ---------------------SET DEFAULTS IF NULL------------------------ */                
         if (sort == null)
             sort = "idgenres";
+        if (year == null)
+            year = 0; /* That's stupid, but according to DB, some movies were produced in 1 AD */
+        if (endyear == null)
+            endyear = 2500; /* That's also stupid, but according to DB, some movies are scheduled for 2115 AD */ 
         /* ----------------------------------------------------------------- */        
         String Query = "SELECT DISTINCT g.idgenres, g.genre, COUNT(DISTINCT m.title) AS number "
             + "FROM genres g " 
             + "JOIN movies_genres mg " 
             + "ON mg.idgenres=g.idgenres " 
             + "JOIN movies m " 
-            + "ON mg.idmovies = m.idmovies "            
+            + "ON mg.idmovies = m.idmovies "
+            + "WHERE m.year >= " + year + " AND m.year <= " + endyear + " "
             + "GROUP BY g.idgenres "
             + "ORDER BY g." + sort + ";";    
         ArrayList<Genre> TemporaryCollection = new ArrayList<>();
@@ -76,9 +82,9 @@ public class GenreController {
         Long limit = (long)10;
         if (offset == null)
             offset = (long)0;
-        if (sort == null)
+        if (sort == null || (!sort.equals("idmovies") && !sort.equals("title") && !sort.equals("year")))
             sort = "idmovies";
-        if (sort2 == null)
+        if (sort2 == null || (!sort.equals("idmovies") && !sort.equals("title") && !sort.equals("year")))
             sort2 = "title";
         if (year == null) {
             Calendar cal = Calendar.getInstance();

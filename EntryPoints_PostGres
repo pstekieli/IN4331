@@ -1,0 +1,66 @@
+**Update 18.06.2016 23:52 CEST**
+
+Models :
++ Actor, Genre, Keyword, Movie, Serie (classes representing single objects from the database)
+
+Controllers :
+Controllers are responsible for quering the database, splitting its output and placing it in appropriate objects (created with models classes).
+
+Resources :
+Here are the functions responsible for processing GET requests, its parameters and returning output.
+
+MOVIES
+
+**/api/movies** - display a list of first 10 movies in DB (can be shifted by setting offset)
++ *orderby*  - sort detailed information (movies) by *m.<orderby>*,
++ *offset* - set offset (check PGSQL specification) [default = 0]
++ *syear* - select a strating year for the search [if none is specified then current year is used],
++ *eyear* - select an ending year for the search [if none is specified then current year is used]
++ *title* - search by title, if title matches a single serie or movie, this position is returned.... in case of multiple matches, only movies are returned
+
+**/api/movies/{idmovies}** - display detailed information connected with the selected movie
+**/api/movies/idmovies}/actors** - display list of actors (without the rest)
+**/api/movies/{idmovies}/keywords** - display list of keywords (without the rest)
+**/api/movies/{idmovies}/genres** - display list of genres (without the rest)
+**/api/movies/{idmovies}/series** - display list of series (without the rest)
+
+ACTORS
+
+**/api/actors** - display a list of first 10 actors (can be shifted by setting offset)
++ *offset* - set offset (check PGSQL specification) [default = 0]
++ *orderby* - order by [idactors, fname, lname]
++ *firstname* - search by first name
++ *lastname* - search by last name
+
+**/api/actors/{idactors}** - display extended information connected with the selected actor
++ *orderby* - sort detailed information (movies) by *orderby*
+
+**/api/genres/{idactors}/movies** - display detailed information (without statistics)
++ *orderby* - sort detailed information (movies) by *orderby*
+
+**/api/genres/{idactors}/statistics** - display detailed information (without movies)
+
+GENRES
+
+**/api/genres** - display a list of all genres
++ *orderby* - order by [idgenres, genre]
+
+**/api/genres/{idgenres}** - display basic information connected with selected genre
++ *details=true* - add detailed information (movies and statistics),
++ *orderby1* and *orderby2* - sort detailed information (movies) first by *orderby1* and then by *orderby2*,
++ *limit* - limit output to x positions [default = 100],
++ *offset* - set offset (check PGSQL specification) [default = 0]
+
+**/api/genres/{idgenres}/movies** - display detailed information (without statistics)
++ *orderby1* and *orderby2* - sort detailed information (movies) first by *orderby1* and then by *orderby2*,
++ *limit* - limit output to x positions [default = 100],
++ *offset* - set offset (check PGSQL specification) [default = 0]
++ *year* - select a strating year for the search [if none is specified then current year is used],
++ *endyear* - select an ending year for the search [if none is specified then current year is used]
+
+**/api/genres/{idgenres}/statistics** - display detailed information (without movies)
++ *orderby1* and *orderby2* - useless in this example,
++ *limit* - limit output to x positions [default = 100],
++ *offset* - set offset (check PGSQL specification) [default = 0]
++ *year* - select a strating year for the search [if none is specified then current year is used],
++ *endyear* - select an ending year for the search [if none is specified then current year is used]

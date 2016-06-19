@@ -37,6 +37,7 @@ import java.util.logging.Logger;
  * @version v0.1 (15.05.2016)
  * @version v0.2 (18.05.2016)
  * @version v0.3s (19.05.2016)
+ * @version v1.0 (19.06.2016)
  * 
  **/
 public class JDBC {   
@@ -45,7 +46,7 @@ public class JDBC {
     private static Statement st = null;
     private static ResultSet rs = null;
    
-    private static final String URL = "jdbc:postgresql://localhost:6789/imdb";
+    private static final String URL = "jdbc:postgresql://localhost:5432/imdb";
     private static final String USER = "postgres";
     private static final String PASSWORD = "1234";    
     

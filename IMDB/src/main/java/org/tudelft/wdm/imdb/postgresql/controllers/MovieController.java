@@ -42,6 +42,7 @@ import org.tudelft.wdm.imdb.models.Serie;
  * @version v0.3s (19.05.2016)
  * @version v0.4 (28.05.2016)
  * @version v0.5 (08.06.2016)
+ * @version v1.0 (19.06.2016) FINAL REVIEW & CORRECTIONS
  * 
  **/
 public class MovieController {    
@@ -53,11 +54,11 @@ public class MovieController {
         /* ---------------------SET DEFAULTS IF NULL------------------------ */        
         if (offset == null) 
             offset = (long)0;        
-        if (sort == null)
-            sort = "year";
+        if (sort == null || !sort.equals("idmovies") || !sort.equals("title") || !sort.equals("year"))
+            sort = "year"; /* Enforce a valid option if none is specified or a wrong one is entered */        
         /* ----------------------------------------------------------------- */
         
-        String Query = ("SELECT DISTINCT m.idmovies, m.title, m.year "
+        String Query = ("SELECT DISTINCT m.idmovies"
             + "FROM movies m "            
             + "ORDER BY m." + sort + " "            
             + "LIMIT 10 OFFSET " + offset + ";"); /* Q0 */
@@ -74,25 +75,34 @@ public class MovieController {
         return TemporaryCollection;
     }    
     public ArrayList<Long> SetActiveFiltersForCollectionByTitle (String title, String sort, String syear, String eyear) {
-        if (sort == null)
-            sort = "year";
         ArrayList<Long> TemporaryCollection = new ArrayList<>();
-        if (syear == null)
-            JDBC.PerformQuery("SELECT DISTINCT m.idmovies, m.year FROM movies m WHERE m.title ILIKE '%" + title + "%' ORDER BY m." + sort + ";");        
-        else {
-            if (eyear == null) {
-                eyear = Integer.toString(Calendar.getInstance().get(Calendar.YEAR));
-                JDBC.PerformQuery("SELECT DISTINCT m.idmovies, m.year FROM movies m WHERE m.title ILIKE '%" + title + "%' AND m.year >= " + syear + " AND m.year <= " + eyear + " ORDER BY m." + sort + ";");        
-            }
-            else
-                JDBC.PerformQuery("SELECT DISTINCT m.idmovies, m.year FROM movies m WHERE m.title ILIKE '%" + title + "%' AND m.year >= " + syear + " AND m.year <= " + eyear + " ORDER BY m." + sort + ";");        
-        }
-                    
-        
+        if (title != null) {
+            JDBC.PerformQuery("SELECT EXISTS (SELECT DISTINCT m.idmovies FROM movies m WHERE m.title ILIKE '" + title + "');");
+            try {                
+                JDBC.getResultSet().next();                
+                if (JDBC.getResultSet().getBoolean("exists") == true) {
+                    JDBC.PerformQuery("SELECT DISTINCT m.idmovies FROM movies m WHERE m.title ILIKE '" + title + "';");                    
+                }
+                else { /* PARTIAL MATCHES */                    
+                    if (sort == null || !sort.equals("idmovies") || !sort.equals("title") || !sort.equals("year"))
+                        sort = "year";
+                    if (syear == null)
+                        JDBC.PerformQuery("SELECT m.idmovies FROM movies m WHERE m.title ILIKE '%" + title + "%' AND m.idmovies NOT IN (SELECT DISTINCT m.idmovies FROM movies m JOIN series s ON m.idmovies = s.idmovies WHERE m.title ILIKE '%" + title + "%') ORDER BY m." + sort + ";");                            
+                    else {
+                        if (eyear == null) 
+                            eyear = Integer.toString(Calendar.getInstance().get(Calendar.YEAR));                                
+                        JDBC.PerformQuery("SELECT m.idmovies FROM movies m WHERE m.title ILIKE '%" + title + "%' AND m.idmovies NOT IN (SELECT DISTINCT m.idmovies FROM movies m JOIN series s ON m.idmovies = s.idmovies WHERE m.title ILIKE '%" + title + "%') AND m.year >= " + syear + " AND m.year <= " + eyear + " ORDER BY m." + sort + ";");            
+                    }
+                }
+            } catch (SQLException ex) {
+                Logger.getLogger(MovieController.class.getName()).log(Level.SEVERE, null, ex);
+            }            
+        }        
         try {                
             while (JDBC.getResultSet().next()) {
                 TemporaryCollection.add(JDBC.getResultSet().getLong("idmovies"));
             }
+            JDBC.CloseConnection(); 
         } catch (SQLException ex) {
                 Logger.getLogger(MovieController.class.getName()).log(Level.SEVERE, null, ex);
         }
