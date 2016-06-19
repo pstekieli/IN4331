@@ -86,7 +86,7 @@ public class MovieController {
     }
     
     public static ArrayList<Genre> getGenreInformation(long movieId){
-        Statement s = new Statement("MATCH (a:movies {idmovies:" + movieId + "})-[r:GENRE_OF_MOVIE]->(b:genres)"
+        Statement s = new Statement("MATCH (a:movies {idmovies:" + movieId + "})-[r:MOVIE_GENRE]->(b:genres)"
                 + " RETURN b.idgenres, b.genre");
         StatementResult sr = Controller.query(s);
         Controller.closeConnection();
@@ -102,7 +102,7 @@ public class MovieController {
     }
     
     public static ArrayList<Keyword> getKeywordInformation(long movieId){
-        Statement s = new Statement("MATCH (a:movies {idmovies:" + movieId + "})-[r:KEYWORD_OF_MOVIE]->(b:keywords)"
+        Statement s = new Statement("MATCH (a:movies {idmovies:" + movieId + "})-[r:MOVIE_KEYWORD]->(b:keywords)"
                 + "RETURN b.idkeywords, b.keyword");
         StatementResult sr = Controller.query(s);
         Controller.closeConnection();

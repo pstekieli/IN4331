@@ -84,7 +84,7 @@ public class Movies {
                 + "RETURN m.idmovies AS id, m.title AS title, m.year AS year"
                 + sort_arg
                 + " SKIP " + offset_arg
-                + " LIMIT 10";
+                + "";
         
         Statement s = new Statement(query);
         ArrayList<Movie> movies = MovieController.getMoviesFull(s);
