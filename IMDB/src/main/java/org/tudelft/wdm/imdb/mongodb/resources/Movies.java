@@ -42,9 +42,11 @@ public class Movies {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public List<Movie> moviesByTitle(@QueryParam("title") String title, @QueryParam("year") String year) {
-    	Integer yearNumeric = year != null ? Integer.valueOf(year) : null;
-    	List<Movie> movies = Controller.getMoviesByTitleYear(title, yearNumeric);
+    public List<Movie> moviesByTitle(@QueryParam("title") String title, @QueryParam("year") String year, @QueryParam("endyear") String endYear) {
+    	Integer yearNumeric = Integer.valueOf(year);
+		Integer endYearNumeric = endYear != null ? Integer.valueOf(endYear) : null;
+    	
+    	List<Movie> movies = Controller.getMoviesByTitleYearRange(title, yearNumeric, endYearNumeric);
 
         return movies;
     }

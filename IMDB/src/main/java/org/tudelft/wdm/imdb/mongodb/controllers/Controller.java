@@ -168,14 +168,25 @@ public class Controller {
         return createMovieObject(id, true, true);
     }
     
-    public static List<Movie> getMoviesByTitleYear(String title, Integer year) {
+    public static List<Movie> getMoviesByTitleYearRange(String title, Integer year, Integer endYear) {
     	initMongoDB();
+    	
+    	BasicDBObject yearQuery = null;
+    	if (year != null) {
+    		yearQuery = new BasicDBObject("$gte", year);
+    		
+    		if (endYear != null) {
+        		yearQuery.append("$lte", endYear);
+    		}
+    	} else if (endYear != null) {
+    		yearQuery = new BasicDBObject("$lte", endYear);
+		}
     	
     	Pattern expression = Pattern.compile(title, Pattern.CASE_INSENSITIVE | Pattern.LITERAL);
     	BasicDBObject query = new BasicDBObject("title", new BasicDBObject("$regex", expression)).append("type", 3);
     	
-    	if (year != null) {
-    		query.append("year", year);
+    	if (yearQuery != null) {
+    		query.append("year", yearQuery);
     	}
     	
     	List<Movie> movies = new ArrayList<Movie>();
