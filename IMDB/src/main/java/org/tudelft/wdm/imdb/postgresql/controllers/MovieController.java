@@ -77,10 +77,10 @@ public class MovieController {
     public ArrayList<Long> SetActiveFiltersForCollectionByTitle (String title, String sort, String syear, String eyear) {
         ArrayList<Long> TemporaryCollection = new ArrayList<>();
         if (title != null) {
-            JDBC.PerformQuery("SELECT EXISTS (SELECT DISTINCT m.idmovies FROM movies m WHERE m.title ILIKE '" + title + "');");
+            JDBC.PerformQuery("SELECT COUNT(DISTINCT m.idmovies) AS number FROM movies m WHERE m.title ILIKE '" + title + "';");
             try {                
                 JDBC.getResultSet().next();                
-                if (JDBC.getResultSet().getBoolean("exists") == true) {
+                if (JDBC.getResultSet().getInt("number") == 1) {                    
                     JDBC.PerformQuery("SELECT DISTINCT m.idmovies FROM movies m WHERE m.title ILIKE '" + title + "';");                    
                 }
                 else { /* PARTIAL MATCHES */                    
