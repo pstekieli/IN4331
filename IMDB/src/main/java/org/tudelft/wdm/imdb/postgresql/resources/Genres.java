@@ -37,79 +37,71 @@ import org.tudelft.wdm.imdb.postgresql.controllers.GenreController;
 /**
  *
  * @author Piotr Tekieli <p.s.tekieli@student.tudelft.nl>
- * @version v0.1 (15.05.2016)
- * @version v0.2 (18.05.2016)
- * @version v0.3s (19.05.2016)
- * @version v0.4 (28.05.2016)
- * @version v1.0 (19.06.2016)
+ * @version v1.0f (22.06.2016)
  * 
  **/
 @Path("postgresql/genres")
 public class Genres {
-   
-    Long voffset = null, vlimit = null;
-    Integer vyear = null, vendyear = null;  
+     
+    /**
+     * Method handling HTTP GET requests. The returned object will be sent
+     * to the client as "text/plain" media type 
+     * 
+     * @param sort Sort results by *sort* value     
+     * @param year Setting starting year for searching
+     * @param endyear Settting ending year for searching
+     * @return List of genres that fit the description.      
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public ArrayList<Genre> getAllGenres(@QueryParam("sort") String sort, @QueryParam("year") Integer year, @QueryParam("endyear") Integer endyear) {      
+        if (sort == null || (!sort.equals("idgenres") && !sort.equals("genre")))
+            sort = "idgenres";
+        GenreController GenreController = new GenreController();        
+        return GenreController.SetActiveFiltersForCollection(sort, year, endyear);
+        }        
     
     /**
      * Method handling HTTP GET requests. The returned object will be sent
      * to the client as "text/plain" media type 
      * 
-     * @param sort Sort results by *sort* value
+     * @param id Seting actor id
      * @param offset Setting offset for results
-     * @param year Setting starting year for search
-     * @param endyear Settting ending year for search
-     * @param orderby1 Setting first sorting parameter
-     * @param orderby2 Setting second sorting parameter
-     * @return      
+     * @param year Setting starting year for searching
+     * @param endyear Settting ending year for searching
+     * @param order Setting first parameter for sorting
+     * @param order2 Setting second parameter for sorting
+     * @return List of genres that fit the description.       
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public ArrayList<Genre> getAllGenres(@QueryParam("sort") String sort, @QueryParam("year") String year, @QueryParam("endyear") String endyear) {      
-        ParseWhatPossible(null, year, endyear);
-        if (sort == null || (!sort.equals("idgenres") && !sort.equals("genre")))
-            sort = "idgenres";
-        GenreController GenreController = new GenreController();        
-        return GenreController.SetActiveFiltersForCollection(sort, vyear, vendyear);
-        }        
-    
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{genreId}")
-    public ArrayList<Genre> displayDetailed(@PathParam("genreId") Long id, @QueryParam("offset") String offset, @QueryParam("year") String year, @QueryParam("endyear") String endyear, @QueryParam("orderby1") String order, @QueryParam("orderby2") String order2) {        
+    public ArrayList<Genre> displayDetailed(@PathParam("genreId") Long id, @QueryParam("offset") Long offset, @QueryParam("year") Integer year, @QueryParam("endyear") Integer endyear, @QueryParam("orderby1") String order, @QueryParam("orderby2") String order2) {        
         GenreController GenreController = new GenreController();        
-        ParseWhatPossible(offset, year, endyear);             
         ArrayList<Long> single = new ArrayList<>();
         single.add(id);               
-        return GenreController.GetGenreInformation(voffset, single, vyear, vendyear, order, order2);
+        return GenreController.GetGenreInformation(offset, single, year, endyear, order, order2);
     }
     
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{genreId}/movies")
-    public ArrayList<Movie> displayMovies(@PathParam("genreId") Long id, @QueryParam("offset") String offset, @QueryParam("year") String year, @QueryParam("endyear") String endyear, @QueryParam("orderby1") String order, @QueryParam("orderby2") String order2) {        
+    public ArrayList<Movie> displayMovies(@PathParam("genreId") Long id, @QueryParam("offset") Long offset, @QueryParam("year") Integer year, @QueryParam("endyear") Integer endyear, @QueryParam("orderby1") String order, @QueryParam("orderby2") String order2) {        
         GenreController GenreController = new GenreController();        
-        ParseWhatPossible(offset, year, endyear);             
         ArrayList<Long> single = new ArrayList<>();
         single.add(id);
-        ArrayList<Genre> genre = GenreController.GetGenreInformation(voffset, single, vyear, vendyear, order, order2);
+        ArrayList<Genre> genre = GenreController.GetGenreInformation(offset, single, year, endyear, order, order2);
         return genre.get(0).displayMovies();
     }
     
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{genreId}/statistics")
-    public Integer displayStatistics(@PathParam("genreId") Long id, @QueryParam("offset") String offset, @QueryParam("year") String year, @QueryParam("endyear") String endyear, @QueryParam("orderby1") String order, @QueryParam("orderby2") String order2) {        
+    public Integer displayStatistics(@PathParam("genreId") Long id, @QueryParam("offset") Long offset, @QueryParam("year") Integer year, @QueryParam("endyear") Integer endyear, @QueryParam("orderby1") String order, @QueryParam("orderby2") String order2) {        
         GenreController GenreController = new GenreController();        
-        ParseWhatPossible(offset, year, endyear);             
         ArrayList<Long> single = new ArrayList<>();
         single.add(id);
-        ArrayList<Genre> genre = GenreController.GetGenreInformation(voffset, single, vyear, vendyear, order, order2);
+        ArrayList<Genre> genre = GenreController.GetGenreInformation(offset, single, year, endyear, order, order2);
         return genre.get(0).displayStatistics();
-    }
-    
-    private void ParseWhatPossible(String offset, String year, String endyear) {                   
-        if (offset != null) {voffset = Long.parseLong(offset);}        
-        if (year != null) {vyear = Integer.parseInt(year);}
-        if (endyear != null) {vendyear = Integer.parseInt(endyear);}          
     }
 }

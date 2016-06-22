@@ -26,7 +26,6 @@ package org.tudelft.wdm.imdb.postgresql.controllers;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.tudelft.wdm.imdb.models.Genre;
@@ -35,11 +34,7 @@ import org.tudelft.wdm.imdb.models.Movie;
 /**
  *
  * @author Piotr Tekieli <p.s.tekieli@student.tudelft.nl>
- * @version v0.1 (15.05.2016)
- * @version v0.2 (18.05.2016)
- * @version v0.3s (19.05.2016)
- * @version v0.4 (28.05.2016)
- * @version v1.0 (19.06.2016)
+ * @version v1.0f (22.06.2016)
  * 
  **/
 public class GenreController {
@@ -77,22 +72,19 @@ public class GenreController {
         }
         return TemporaryCollection;
     }     
-    public void SetActiveFiltersForSingle (Long offset, Long id, Integer year, Integer endyear, String sort, String sort2) {
+    public void SetActiveFiltersForSingle (Long offset, Long id, Integer startYear, Integer endYear, String sort, String sort2) {
         /* ---------------------SET DEFAULTS IF NULL------------------------ */
-        Long limit = (long)10;
+        Long limit = (long)20;
         if (offset == null)
             offset = (long)0;
         if (sort == null || (!sort.equals("idmovies") && !sort.equals("title") && !sort.equals("year")))
             sort = "idmovies";
         if (sort2 == null || (!sort.equals("idmovies") && !sort.equals("title") && !sort.equals("year")))
             sort2 = "title";
-        if (year == null) {
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(new Date());            
-            year = cal.get(Calendar.YEAR);
-        }
-        if (endyear == null)
-            endyear = year;
+        if (startYear == null) 
+            startYear = Calendar.getInstance().get(Calendar.YEAR);        
+        if (endYear == null)
+            endYear = startYear;
         /* ----------------------------------------------------------------- */    
         Queries.add("SELECT DISTINCT g.idgenres, g.genre "
             + "FROM genres g "            
@@ -104,7 +96,7 @@ public class GenreController {
             "JOIN genres g " +
             "ON mg.idgenres = g.idgenres " +
             "WHERE g.idgenres = " + id + " " +
-            "AND m.year >= " + year + " AND m.year <= " + endyear + " " +
+            "AND m.year >= " + startYear + " AND m.year <= " + endYear + " " +
             "ORDER BY m." + sort +", m." + sort2 + " " +
             "LIMIT " + limit + " OFFSET " + offset + ";");        
         Queries.add("SELECT COUNT(DISTINCT m.title) AS number " +
@@ -114,7 +106,7 @@ public class GenreController {
             "JOIN movies m " +
             "ON mg.idmovies = m.idmovies " +                
             "WHERE g.idgenres = " + id + " " +
-            "AND m.year >= " + year + " AND m.year <= " + endyear + ";");
+            "AND m.year >= " + startYear + " AND m.year <= " + endYear + ";");
     }
     public ArrayList<Genre> GetGenreInformation(Long offset, ArrayList<Long> id, Integer year, Integer endyear, String sort, String sort2) {
         ArrayList<Genre> TemporaryCollection = new ArrayList<>(); 
@@ -135,9 +127,8 @@ public class GenreController {
         JDBC.PerformQuery(Queries.get(0));
         Genre genre = null;
         try {
-            while (JDBC.getResultSet().next()) {
-                genre = new Genre(JDBC.getResultSet().getLong("idgenres"), JDBC.getResultSet().getString("genre"));
-            }
+            while (JDBC.getResultSet().next()) 
+                genre = new Genre(JDBC.getResultSet().getLong("idgenres"), JDBC.getResultSet().getString("genre"));            
         } 
         catch (SQLException ex) {
             Logger.getLogger(MovieController.class.getName()).log(Level.SEVERE, null, ex);
@@ -148,9 +139,8 @@ public class GenreController {
     public void GetMoviesInformation(Genre genre) {
         JDBC.PerformQuery(Queries.get(1));
         try {
-            while (JDBC.getResultSet().next()) {
-                genre.AddMovie(new Movie(JDBC.getResultSet().getLong("idmovies"), JDBC.getResultSet().getString("title"), JDBC.getResultSet().getInt("year")));    
-            }
+            while (JDBC.getResultSet().next()) 
+                genre.AddMovie(new Movie(JDBC.getResultSet().getLong("idmovies"), JDBC.getResultSet().getString("title"), JDBC.getResultSet().getInt("year")));            
         } 
         catch (SQLException ex) {
             Logger.getLogger(MovieController.class.getName()).log(Level.SEVERE, null, ex);
@@ -160,9 +150,8 @@ public class GenreController {
     public void GetGenreStatistics(Genre genre) {        
         JDBC.PerformQuery(Queries.get(2));
         try {
-            while (JDBC.getResultSet().next()) {
-                genre.SetStatistic(JDBC.getResultSet().getInt("number"));    
-            }
+            while (JDBC.getResultSet().next()) 
+                genre.SetStatistic(JDBC.getResultSet().getInt("number"));            
         } 
         catch (SQLException ex) {
             Logger.getLogger(MovieController.class.getName()).log(Level.SEVERE, null, ex);

@@ -38,11 +38,7 @@ import org.tudelft.wdm.imdb.postgresql.controllers.ActorController;
 /**
  *
  * @author Piotr Tekieli <p.s.tekieli@student.tudelft.nl>
- * @version v0.1 (15.05.2016)
- * @version v0.2 (18.05.2016)
- * @version v0.3s (19.05.2016)
- * @version v0.4 (28.05.2016)
- * @version v1.0 (19.06.2016)
+ * @version v1.0f (22.06.2016)
  * 
  **/
 @Path("postgresql/actors")
@@ -56,29 +52,24 @@ public class Actors {
      * @param sort Sorting output by *sort*
      * @param fname Finding actors by their first name
      * @param lname Finding actors by their last name
-     * @return String that will be returned as a text/plain response.
+     * @return List of actors fitting the description.
      */
     
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public ArrayList<Actor> getAllActors(@QueryParam("offset") String offset, @QueryParam("orderby") String sort, @QueryParam("firstname") String fname, @QueryParam("lastname") String lname) {         
+    public ArrayList<Actor> getAllActors(@QueryParam("offset") Long offset, @QueryParam("orderby") String sort, @QueryParam("firstname") String fname, @QueryParam("lastname") String lname) {         
         ActorController ActorController = new ActorController();        
-        /* ---------------------PARSE WHAT POSSIBLE------------------------ */
-        Long voffset = null;             
-        if (offset != null) {voffset = Long.parseLong(offset);}             
-        /* ----------------------------------------------------------------- */
         /* ---------------------SECURE INPUT-------------------------------- */        
-        if (!fname.isEmpty())
+        if (fname != null)
             fname = fname.replaceAll("[^A-Za-z]", "");
-        if (!lname.isEmpty())
+        if (lname != null)
             lname = lname.replaceAll("[^A-Za-z]", "");
         /* ----------------------------------------------------------------- */
         ArrayList<Long> IDs;
-        if (fname == null && lname == null) {
-            IDs = ActorController.SetActiveFiltersForCollection(voffset, sort);
-        } else {              
-            IDs = ActorController.SetActiveFiltersForCollectionByName(fname, lname, sort);
-        }
+        if (fname == null && lname == null) 
+            IDs = ActorController.SetActiveFiltersForCollection(offset, sort);         
+        else              
+            IDs = ActorController.SetActiveFiltersForCollectionByName(fname, lname, sort);        
         return ActorController.GetActorInformation(IDs, sort);
     }        
     

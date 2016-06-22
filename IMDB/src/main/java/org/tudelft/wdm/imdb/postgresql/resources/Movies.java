@@ -42,12 +42,7 @@ import org.tudelft.wdm.imdb.postgresql.controllers.MovieController;
 /**
  *
  * @author Piotr Tekieli <p.s.tekieli@student.tudelft.nl>
- * @version v0.1 (15.05.2016)
- * @version v0.2 (18.05.2016)
- * @version v0.3s (19.05.2016)
- * @version v0.4 (28.05.2016)
- * @version v0.5 (08.05.2016)
- * @version v1.0 (19.06.2016)
+ * @version v1.0f (22.06.2016)
  * 
  **/
 @Path("postgresql/movies")
@@ -60,27 +55,23 @@ public class Movies {
      * @param offset Display results starting at ID
      * @param sort Sort results by *sort* value
      * @param title Search by *title*
-     * @param syear Starting year (syear) for the search
-     * @param eyear Ending year (eyear) for the search
-     * @return String that will be returned as a text/plain response.
+     * @param startYear Starting year (syear) for the search
+     * @param endYear Ending year (eyear) for the search
+     * @return List of movies that fit selected criterias. 
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public ArrayList<Movie> getAllMovies(@QueryParam("offset") String offset, @QueryParam("orderby") String sort, @QueryParam("title") String title, @QueryParam("syear") String syear, @QueryParam("eyear") String eyear) {         
+    public ArrayList<Movie> searchForMovies(@QueryParam("offset") Long offset, @QueryParam("orderby") String sort, @QueryParam("title") String title, @QueryParam("syear") Integer startYear, @QueryParam("eyear") Integer endYear) {         
         MovieController MovieController = new MovieController();        
-        /* ---------------------PARSE WHAT POSSIBLE------------------------ */        
-        Long voffset = null;                
-        if (offset != null) {voffset = Long.parseLong(offset);}         
-        /* ----------------------------------------------------------------- */
         /* ---------------------SECURE INPUT-------------------------------- */        
-        if (!title.isEmpty())
+        if (title != null)
             title = title.replaceAll("/(//+)([^A-Za-z])", "");         
         /* ----------------------------------------------------------------- */
         ArrayList<Long> IDs;
-        if (!title.isEmpty()) {
-            IDs = MovieController.SetActiveFiltersForCollectionByTitle(title, sort, syear, eyear);
+        if (title != null) {
+            IDs = MovieController.SetActiveFiltersForCollectionByTitle(title, sort, startYear, endYear);
         } else {              
-            IDs = MovieController.SetActiveFiltersForCollection(voffset, sort);
+            IDs = MovieController.SetActiveFiltersForCollection(offset, sort);
         }
         return MovieController.GetMovieInformation(IDs);
     }
@@ -88,7 +79,7 @@ public class Movies {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{movieId}")
-    public ArrayList<Movie> displayDetailed(@PathParam("movieId") Long id) {        
+    public ArrayList<Movie> AccessMovie(@PathParam("movieId") Long id) {        
         MovieController MovieController = new MovieController();        
         ArrayList<Long> single = new ArrayList<>();
         single.add(id);        

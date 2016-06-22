@@ -34,10 +34,7 @@ import java.util.logging.Logger;
 /**
  *
  * @author Piotr Tekieli <p.s.tekieli@student.tudelft.nl>
- * @version v0.1 (15.05.2016)
- * @version v0.2 (18.05.2016)
- * @version v0.3s (19.05.2016)
- * @version v1.0 (19.06.2016)
+ * @version v1.0f (22.06.2016)
  * 
  **/
 public class JDBC {   
@@ -48,7 +45,7 @@ public class JDBC {
    
     private static final String URL = "jdbc:postgresql://localhost:5432/imdb";
     private static final String USER = "postgres";
-    private static final String PASSWORD = "1234";    
+    private static final String PASSWORD = "0000";    
     
     private static void EstablishConnection() throws ClassNotFoundException {    
         try {            
