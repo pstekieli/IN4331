@@ -52,7 +52,7 @@ public class MovieController {
         if (sort == null || !sort.equals("idmovies") || !sort.equals("title") || !sort.equals("year"))
             sort = "idmovies"; /* Enforce a valid option if none is specified or a wrong one is entered */        
         /* ----------------------------------------------------------------- */        
-        String GetAllObjectsQuery = ("SELECT DISTINCT m.idmovies FROM movies m ORDER BY m." + sort + " LIMIT 20 OFFSET " + offset + ";");        
+        String GetAllObjectsQuery = ("SELECT m.idmovies FROM movies m ORDER BY m." + sort + " LIMIT 20 OFFSET " + offset + ";");        
         ArrayList<Long> TemporaryCollection = new ArrayList<>();
         JDBC.PerformQuery(GetAllObjectsQuery);        
         try {                
@@ -66,7 +66,7 @@ public class MovieController {
     }    
     public ArrayList<Long> SetActiveFiltersForCollectionByTitle (String title, String sort, Integer startYear, Integer endYear) {
         ArrayList<Long> TemporaryCollection = new ArrayList<>();
-        JDBC.PerformQuery("SELECT COUNT(DISTINCT m.idmovies) AS number FROM movies m WHERE m.title ILIKE '" + title + "';");
+        JDBC.PerformQuery("SELECT COUNT(m.idmovies) AS number FROM movies m WHERE m.title ILIKE '" + title + "';");
         try {                
             JDBC.getResultSet().next();                
             if (JDBC.getResultSet().getInt("number") != 1) { /* PARTIAL MATCHES */
@@ -81,7 +81,7 @@ public class MovieController {
                 }
             }
             else {
-                JDBC.PerformQuery("SELECT DISTINCT m.idmovies FROM movies m WHERE m.title ILIKE '" + title + "';");                
+                JDBC.PerformQuery("SELECT m.idmovies FROM movies m WHERE m.title ILIKE '" + title + "';");                
             }
             while (JDBC.getResultSet().next()) 
                 TemporaryCollection.add(JDBC.getResultSet().getLong("idmovies"));                                       
@@ -92,7 +92,7 @@ public class MovieController {
         return TemporaryCollection;
     }
     public void SetActiveFiltersForSingle (long id) {
-        Queries.add("SELECT DISTINCT m.idmovies, m.title, m.year "
+        Queries.add("SELECT m.idmovies, m.title, m.year "
             + "FROM movies m "            
             + "WHERE m.idmovies = " + id + ";"); /* Q0 */
         Queries.add("SELECT DISTINCT a.idactors, a.fname, a.lname, a.gender, ai.character, ai.billing_position " +

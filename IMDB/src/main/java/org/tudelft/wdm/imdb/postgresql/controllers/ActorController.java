@@ -58,7 +58,7 @@ public class ActorController {
     }    
     public ArrayList<Long> SetActiveFiltersForCollection(Long voffset, String vsort) {        
         SetDefaultsIfNull(voffset, vsort);      
-        String Query = "SELECT DISTINCT a.idactors FROM actors a ORDER BY a." + sort + " LIMIT " + limit + " OFFSET " + offset + ";";    
+        String Query = "SELECT a.idactors FROM actors a ORDER BY a." + sort + " LIMIT " + limit + " OFFSET " + offset + ";";    
         ArrayList<Long> TemporaryCollection = new ArrayList<>();
         JDBC.PerformQuery(Query);        
         try {                
@@ -74,11 +74,11 @@ public class ActorController {
         SetDefaultsIfNull(null, vsort);
         String Query;                   
         if (fname != null && lname == null) 
-            Query = "SELECT DISTINCT a.idactors FROM actors a WHERE a.fname ILIKE '%" + fname + "%' ORDER BY a." + sort + ";";        
+            Query = "SELECT a.idactors FROM actors a WHERE a.fname ILIKE '%" + fname + "%' ORDER BY a." + sort + ";";        
         else if (fname == null && lname != null) 
-            Query = "SELECT DISTINCT a.idactors FROM actors a WHERE a.lname ILIKE '%" + lname + "%' ORDER BY a." + sort + ";";        
+            Query = "SELECT a.idactors FROM actors a WHERE a.lname ILIKE '%" + lname + "%' ORDER BY a." + sort + ";";        
         else
-            Query = "SELECT DISTINCT a.idactors FROM actors a WHERE a.fname ILIKE '%" + fname + "%' AND a.lname ILIKE '%" + lname + "%' ORDER BY a." + sort + ";";
+            Query = "SELECT a.idactors FROM actors a WHERE a.fname ILIKE '%" + fname + "%' AND a.lname ILIKE '%" + lname + "%' ORDER BY a." + sort + ";";
         ArrayList<Long> TemporaryCollection = new ArrayList<>();
         JDBC.PerformQuery(Query);        
         try {                
@@ -92,7 +92,7 @@ public class ActorController {
         return TemporaryCollection; 
     }
     public void SetActiveFiltersForSingle (long id, String sort) {
-        Queries.add("SELECT DISTINCT a.idactors, a.fname, a.lname, a.gender "
+        Queries.add("SELECT a.idactors, a.fname, a.lname, a.gender "
             + "FROM actors a "            
             + "WHERE a.idactors=" + id + ";"); /* Q0 */
         if (sort == null) {

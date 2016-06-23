@@ -45,12 +45,9 @@ public class GenreController {
         /* ---------------------SET DEFAULTS IF NULL------------------------ */                
         if (sort == null)
             sort = "idgenres";
-        if (year == null)
-            year = 0; /* That's stupid, but according to DB, some movies were produced in 1 AD */
-        if (endyear == null)
-            endyear = 2500; /* That's also stupid, but according to DB, some movies are scheduled for 2115 AD */ 
-        /* ----------------------------------------------------------------- */        
-        String Query = "SELECT DISTINCT g.idgenres, g.genre, COUNT(DISTINCT m.title) AS number "
+        String Query;
+        if (year != null && endyear != null) {
+            Query = "SELECT g.idgenres, g.genre, COUNT(DISTINCT m.idmovies) AS number "
             + "FROM genres g " 
             + "JOIN movies_genres mg " 
             + "ON mg.idgenres=g.idgenres " 
@@ -58,7 +55,31 @@ public class GenreController {
             + "ON mg.idmovies = m.idmovies "
             + "WHERE m.year >= " + year + " AND m.year <= " + endyear + " "
             + "GROUP BY g.idgenres "
-            + "ORDER BY g." + sort + ";";    
+            + "ORDER BY g." + sort + ";";
+        }
+        else if (year != null && endyear == null) {
+            Query = "SELECT g.idgenres, g.genre, COUNT(DISTINCT m.idmovies) AS number "
+            + "FROM genres g " 
+            + "JOIN movies_genres mg " 
+            + "ON mg.idgenres=g.idgenres " 
+            + "JOIN movies m " 
+            + "ON mg.idmovies = m.idmovies "
+            + "WHERE m.year >= " + year + " AND m.year <= " + year + " "
+            + "GROUP BY g.idgenres "
+            + "ORDER BY g." + sort + ";";
+        }
+        else {
+            Query = "SELECT g.idgenres, g.genre, COUNT(DISTINCT m.idmovies) AS number "
+            + "FROM genres g " 
+            + "JOIN movies_genres mg " 
+            + "ON mg.idgenres=g.idgenres " 
+            + "JOIN movies m " 
+            + "ON mg.idmovies = m.idmovies "           
+            + "GROUP BY g.idgenres "
+            + "ORDER BY g." + sort + ";";
+        }
+        /* ----------------------------------------------------------------- */        
+            
         ArrayList<Genre> TemporaryCollection = new ArrayList<>();
         JDBC.PerformQuery(Query);        
         try {                
@@ -86,7 +107,7 @@ public class GenreController {
         if (endYear == null)
             endYear = startYear;
         /* ----------------------------------------------------------------- */    
-        Queries.add("SELECT DISTINCT g.idgenres, g.genre "
+        Queries.add("SELECT g.idgenres, g.genre "
             + "FROM genres g "            
             + "WHERE g.idgenres = " + id + ";"); /* Q0 */
         Queries.add("SELECT DISTINCT m.idmovies, m.title, m.year " +
