@@ -43,6 +43,7 @@ public class Genres {
             switch (sort.toLowerCase()){
                 case "genre":
                 case "name": orderby = " ORDER BY name"; break;
+                case "idmovies":
                 case "movies":
                 case "number of movies": orderby = " ORDER BY moviecount"; break;
             }
