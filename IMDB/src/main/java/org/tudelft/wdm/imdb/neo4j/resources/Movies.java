@@ -87,7 +87,6 @@ public class Movies {
                 + " LIMIT 10";
         
         Statement s = new Statement(query);
-        System.out.println(query);
         ArrayList<Movie> movies = MovieController.getMoviesFull(s);
         return movies;
     }

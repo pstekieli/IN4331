@@ -110,7 +110,6 @@ public class Genres {
                 + " SKIP " + offset_arg
                 + " LIMIT 10";
         
-        System.out.println(query);
         Statement s = new Statement(query);
         ArrayList<Movie> movies = MovieController.getMovies(s);
         return movies;
