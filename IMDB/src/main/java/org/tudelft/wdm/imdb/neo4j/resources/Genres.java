@@ -30,12 +30,24 @@ public class Genres {
      * to the client as "text/plain" media type.
      *
      * @param sort
+     * @param year
+     * @param endyear
      * @return String that will be returned as a text/plain response.
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public ArrayList<Genre> getAllGenres(){
-        Statement s = new Statement("MATCH (g:genres) RETURN g.idgenres AS id, g.genre AS name");
+    public ArrayList<Genre> getAllGenres(@QueryParam("sort") String sort, @QueryParam("year") String year, @QueryParam("endyear") String endyear){
+        String where = GenreController.formulateWhere(year, endyear);
+        String orderby = " ORDER BY id";
+        if (sort!=null){
+            switch (sort.toLowerCase()){
+                case "genre":
+                case "name": orderby = " ORDER BY name"; break;
+                case "movies":
+                case "number of movies": orderby = " ORDER BY moviecount"; break;
+            }
+        }
+        Statement s = new Statement("MATCH (m:movies)-[r:MOVIE_GENRE]->(g:genres)" + where + " RETURN g.idgenres AS id, g.genre AS name, COUNT(m.idmovies) AS moviecount" + orderby);
         return GenreController.getGenresFull(s);
     }
     
@@ -47,6 +59,7 @@ public class Genres {
                 + "}) RETURN g.idgenres AS id, g.genre AS name"
         );
         Genre g = GenreController.getGenre(s);
+        g.SetStatistic(GenreController.getGenreStatistics(id, year, endyear));
         for (Movie m : displayMovies(id, offset, limit, year, endyear, order, order2))
             g.AddMovie(m);
         return g;
@@ -66,7 +79,7 @@ public class Genres {
         String sort_arg;
         if (order==null) sort_arg = " ORDER BY id";
         else {
-            switch (order){
+            switch (order.toLowerCase()){
                 case "title":
                 case "year": sort_arg = " ORDER BY " + order; break;
                 case "number":
@@ -76,7 +89,7 @@ public class Genres {
                 default: sort_arg = " ORDER BY id";
             }
             if (order2!=null){
-                switch (order2){
+                switch (order2.toLowerCase()){
                     case "title":
                     case "year": sort_arg += ", " + order2; break;
                     case "number":
@@ -88,18 +101,7 @@ public class Genres {
             }
         }
         
-        ArrayList<String> where_args = new ArrayList<>();
-        // Regex expression for SQL's "LIKE %str%". (?i) for case insensitive.
-        if (year!=null) where_args.add("m.year>=" + year);
-        if (endyear!=null) where_args.add("m.year<=" + endyear);
-        String where = "";
-        if (!where_args.isEmpty()){
-            where = " WHERE ";
-            for (String arg : where_args){
-                where+=arg + " AND ";
-            }
-            where = where.substring(0, where.length()-5) + " ";
-        }
+        String where = GenreController.formulateWhere(year, endyear);
         
         String query = "MATCH (m:movies)-[r:MOVIE_GENRE]->(g:genres {idgenres:" + id
                 + "}) " + where
@@ -108,6 +110,7 @@ public class Genres {
                 + " SKIP " + offset_arg
                 + " LIMIT 10";
         
+        System.out.println(query);
         Statement s = new Statement(query);
         ArrayList<Movie> movies = MovieController.getMovies(s);
         return movies;

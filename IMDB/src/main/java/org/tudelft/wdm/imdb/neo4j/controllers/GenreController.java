@@ -32,7 +32,6 @@ public class GenreController {
                     r.get("id").asLong(),
                     r.get("name").asString()
             );
-            g.SetStatistic(getGenreStatistics(g.getId()));
             for (Movie m : getMoviesInformation(g.getId()))
                 g.AddMovie(m);
             return g;
@@ -42,7 +41,7 @@ public class GenreController {
     
     /**
      * This function will retrieve only basic genre data.
-     * It is required for the statement to retrieve the id and name
+     * It is required for the statement to retrieve the id, name and moviecount
      * using those exact names.
      * @param query
      * @return 
@@ -57,7 +56,7 @@ public class GenreController {
                     r.get("id").asLong(),
                     r.get("name").asString()
             );
-            g.SetStatistic(getGenreStatistics(g.getId()));
+            g.SetStatistic(r.get("moviecount").asInt());
             genres.add(g);
         }
         return genres;
@@ -91,5 +90,34 @@ public class GenreController {
             return r.get("COUNT(r)").asInt();
         }
         return 0;
-    }    
+    }
+    
+    public static int getGenreStatistics(long genreId, String year, String endyear){
+        String where = formulateWhere(year, endyear);
+        Statement s = new Statement("MATCH ()-[r:MOVIE_GENRE]->(g:genres {idgenres:"
+                + genreId + "})" + where  + " RETURN COUNT(r)"
+        );
+        StatementResult sr = Controller.query(s);
+        Controller.closeConnection();
+        while (sr.hasNext()){
+            Record r = sr.next();
+            return r.get("COUNT(r)").asInt();
+        }
+        return 0;
+    }
+    
+    public static String formulateWhere(String year, String endyear){
+        ArrayList<String> where_args = new ArrayList<>();
+        if (year!=null) where_args.add("m.year>=" + year);
+        if (endyear!=null) where_args.add("m.year<=" + endyear);
+        String where = "";
+        if (!where_args.isEmpty()){
+            where = " WHERE ";
+            for (String arg : where_args){
+                where+=arg + " AND ";
+            }
+            where = where.substring(0, where.length()-5) + " ";
+        }
+        return where;
+    }
 }

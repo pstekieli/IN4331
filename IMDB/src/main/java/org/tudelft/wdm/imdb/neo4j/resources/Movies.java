@@ -55,7 +55,7 @@ public class Movies {
         String sort_arg;
         if (sort==null) sort_arg = "";
         else {
-            switch (sort){
+            switch (sort.toLowerCase()){
                 case "title":
                 case "year": sort_arg = " ORDER BY " + sort; break;
                 case "number":
@@ -87,6 +87,7 @@ public class Movies {
                 + " LIMIT 10";
         
         Statement s = new Statement(query);
+        System.out.println(query);
         ArrayList<Movie> movies = MovieController.getMoviesFull(s);
         return movies;
     }

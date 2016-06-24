@@ -48,7 +48,7 @@ public class Actors {
         String sort_arg;
         if (sort==null) sort_arg = "";
         else {
-            switch (sort){
+            switch (sort.toLowerCase()){
                 case "fname":
                 case "lname":
                 case "gender": sort_arg = " ORDER BY " + sort; break;
