@@ -53,16 +53,16 @@ public class Movies {
         }
         
         String sort_arg;
-        if (sort==null) sort_arg = "";
+        if (sort==null) sort_arg = "ORDER BY id";
         else {
-            switch (sort.toLowerCase()){
+            switch (sort.toLowerCase()){ //Determine order by string
                 case "title":
                 case "year": sort_arg = " ORDER BY " + sort; break;
                 case "number":
                 case "type":
                 case "location":
                 case "language": sort_arg = " ORDER BY m." + sort; break;
-                default: sort_arg = "";
+                default: sort_arg = "ORDER BY id";
             }
         }
         
@@ -72,7 +72,7 @@ public class Movies {
         if (year!=null) where_args.add("m.year>=" + year);
         if (endyear!=null) where_args.add("m.year<=" + endyear);
         String where = "";
-        if (!where_args.isEmpty()){
+        if (!where_args.isEmpty()){ //Combine WHERE statements into a single string
             where = " WHERE ";
             for (String arg : where_args){
                 where+=arg + " AND ";
@@ -80,10 +80,13 @@ public class Movies {
             where = where.substring(0, where.length()-5) + " ";
         }
         
-        String query = "MATCH (m:movies)" + where
+        // Combine all components into a single query
+        String query = "MATCH (m:movies)"
+                + where
                 + "RETURN m.idmovies AS id, m.title AS title, m.year AS year"
                 + sort_arg
-                + " SKIP " + offset_arg
+                + " SKIP "
+                + offset_arg
                 + " LIMIT 10";
         
         Statement s = new Statement(query);
@@ -95,8 +98,11 @@ public class Movies {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{movieId}")
     public ArrayList<Movie> displayDetailed(@PathParam("movieId") Long id){
-        Statement s = new Statement("MATCH (m:movies {idmovies:" + id
-                + "}) RETURN m.idmovies AS id, m.title AS title, m.year AS year");
+        Statement s = new Statement(
+                "MATCH (m:movies {idmovies:"
+                + id
+                + "}) RETURN m.idmovies AS id, m.title AS title, m.year AS year"
+        );
         ArrayList<Movie> movie = MovieController.getMoviesFull(s);
         return movie;
     }

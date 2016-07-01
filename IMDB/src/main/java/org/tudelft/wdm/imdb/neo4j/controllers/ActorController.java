@@ -28,12 +28,13 @@ public class ActorController {
     public static ArrayList<Actor> getActors(Statement query) {
         StatementResult sr = Controller.query(query);
         ArrayList<Actor> actors = new ArrayList<>();
-        while (sr.hasNext()){
+        while (sr.hasNext()){ // Get result data
             Record r = sr.next();
             Actor a = new Actor(
                     r.get("id").asLong(),
                     r.get("fname").asString(),
                     r.get("lname").asString(),
+                    // Check for null to avoid errors
                     r.get("gender").isNull() ? null : ""+r.get("gender").asInt()
             );
             actors.add(a);
@@ -52,7 +53,7 @@ public class ActorController {
     public static ArrayList<Actor> getActorsFull(Statement query) {
         Controller.keepOpen();
         ArrayList<Actor> actors = getActors(query);
-        for (Actor a : actors){
+        for (Actor a : actors){ // Get the individual information required
             for (Movie m : getMoviesInformation(a.GetId(), null))
                 a.AddMovie(m);
             a.SetStatistic(getActorStatistics(a.GetId()));
@@ -62,36 +63,46 @@ public class ActorController {
     }
     
     public static ArrayList<Movie> getMoviesInformation(long actorId, String sort){
+        // Create an order by string if given
         if (sort==null || sort.equals("idmovies")){
             sort="";
         } else {
             sort="ORDER BY m."+sort;
         }
-        Statement s = new Statement("MATCH (a:actors {idactors:" + actorId
+        
+        Statement s = new Statement(
+                "MATCH (a:actors {idactors:"
+                + actorId
                 + "})-[:ACTED_CHARACTER]->(m:movies)"
                 + " RETURN DISTINCT m.idmovies, m.title, m.year"
                 + sort
         );
+        
         StatementResult sr = Controller.query(s);
         Controller.closeConnection();
         ArrayList<Movie> movies = new ArrayList<>();
-        while (sr.hasNext()){
+        while (sr.hasNext()){ // Get result data
             Record r = sr.next();
             movies.add(new Movie(
                     r.get("m.idmovies").asLong(),
                     r.get("m.title").asString(),
+                    // Check for null to avoid errors. If it is null,
+                    // then return 0 to achieve identical output to SQL.
                     r.get("m.year").isNull() ? 0 : r.get("m.year").asInt()));
         }
         return movies;
     }
     
     public static int getActorStatistics(long actorId){
-        Statement s = new Statement("MATCH (a:actors {idactors:" + actorId
+        // Count distinct idmovies in case of multiple roles per movie.
+        Statement s = new Statement(
+                "MATCH (a:actors {idactors:"
+                + actorId
                 + "})-[r:ACTED_CHARACTER]->(m:movies) RETURN COUNT(DISTINCT m.idmovies)"
         );
         StatementResult sr = Controller.query(s);
         Controller.closeConnection();
-        while (sr.hasNext()){
+        while (sr.hasNext()){ // Get result data
             Record r = sr.next();
             return r.get("COUNT(DISTINCT m.idmovies)").asInt();
         }

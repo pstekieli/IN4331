@@ -107,8 +107,8 @@ public class Controller {
             }
             
             // Add list of actors and roles
-            List<Tuple<Integer, Actor>> actorBillings = new ArrayList<Tuple<Integer, Actor>>();
-            List<Integer> actorIndices = new ArrayList<Integer>();
+            List<Tuple<Integer, Actor>> actorBillings = new ArrayList<>();
+            List<Integer> actorIndices = new ArrayList<>();
             
             try (DBCursor actorCursor = actedInCollection.find(new BasicDBObject("idmovies", id))) {
             	while (actorCursor.hasNext()) {
@@ -123,9 +123,9 @@ public class Controller {
             		}
             		
             		if (actedInDocument.get("billing_position") instanceof Integer) {
-            			actorBillings.add(new Tuple<Integer, Actor>((Integer) actedInDocument.get("billing_position"), actor));
+            			actorBillings.add(new Tuple<>((Integer) actedInDocument.get("billing_position"), actor));
             		} else {
-            			actorBillings.add(new Tuple<Integer, Actor>(Integer.MAX_VALUE, actor));
+            			actorBillings.add(new Tuple<>(Integer.MAX_VALUE, actor));
             		}
             	}
             }
@@ -139,7 +139,7 @@ public class Controller {
             
             // Resolve actor info
             BasicDBObject actorsQuery = new BasicDBObject("idactors", new BasicDBObject("$in", actorIndices));
-            Map<Integer, Actor> actorDetails = new HashMap<Integer, Actor>();
+            Map<Integer, Actor> actorDetails = new HashMap<>();
         	
         	try (DBCursor actorCursor = actorsCollection.find(actorsQuery)) {
         		while (actorCursor.hasNext()) {
@@ -189,7 +189,7 @@ public class Controller {
     		query.append("year", yearQuery);
     	}
     	
-    	List<Movie> movies = new ArrayList<Movie>();
+    	List<Movie> movies = new ArrayList<>();
     	
     	try (DBCursor movieCursor = moviesCollection.find(query)) {
     		while (movieCursor.hasNext()) {
@@ -242,7 +242,7 @@ public class Controller {
         	if (!detailed) return actor;
         	
         	// Get a list of the movie indices in which this actor played
-        	List<Integer> movieIndices = new ArrayList<Integer>();
+        	List<Integer> movieIndices = new ArrayList<>();
         	
         	try (DBCursor actedInCursor = actedInCollection.find(new BasicDBObject("idactors", id))) {
         		while (actedInCursor.hasNext()) {
@@ -255,7 +255,7 @@ public class Controller {
     			new BasicDBObject("type", 3)
     			.append("idmovies", new BasicDBObject("$in", movieIndices));
         	
-        	List<Movie> movies = new ArrayList<Movie>();
+        	List<Movie> movies = new ArrayList<>();
         	
         	try (DBCursor movieCursor = moviesCollection.find(moviesQuery)) {
         		while (movieCursor.hasNext()) {
@@ -294,7 +294,7 @@ public class Controller {
     
     public static int getNumberOfMovies(long actorId) {
     	// First build a list of all movie indices that the actor has acted in
-    	List<Integer> movieIndices = new ArrayList<Integer>();
+    	List<Integer> movieIndices = new ArrayList<>();
     	
     	try (DBCursor actedInCursor = actedInCollection.find(new BasicDBObject("idactors", actorId))) {
     		while (actedInCursor.hasNext()) {
@@ -339,7 +339,7 @@ public class Controller {
     		query.append("lname", new BasicDBObject("$regex", Pattern.compile(lastName, Pattern.CASE_INSENSITIVE | Pattern.LITERAL)));
     	}
     	
-    	List<Actor> actors = new ArrayList<Actor>();
+    	List<Actor> actors = new ArrayList<>();
     	
     	try (DBCursor actorCursor = actorsCollection.find(query)) {
     		while (actorCursor.hasNext()) {
@@ -363,7 +363,7 @@ public class Controller {
     		query.append("lname", new BasicDBObject("$regex", Pattern.compile(lastName, Pattern.CASE_INSENSITIVE | Pattern.LITERAL)));
     	}
     	
-    	List<Actor> actors = new ArrayList<Actor>();
+    	List<Actor> actors = new ArrayList<>();
     	
     	try (DBCursor actorCursor = actorsCollection.find(query)) {
     		while (actorCursor.hasNext()) {
@@ -389,7 +389,7 @@ public class Controller {
     			.append("genres", genre)
     			.append("year", yearQuery);
     	
-    	List<Movie> movies = new ArrayList<Movie>();
+    	List<Movie> movies = new ArrayList<>();
     	
     	try (DBCursor movieCursor = moviesCollection.find(query)) {
     		while (movieCursor.hasNext()) {
@@ -409,7 +409,7 @@ public class Controller {
     		yearQuery.append("$lte", yearEnd);
 		}
     	
-    	List<DBObject> pipeline = new ArrayList<DBObject>();
+    	List<DBObject> pipeline = new ArrayList<>();
     	
     	BasicDBObject matching = new BasicDBObject("$match", new BasicDBObject("year", yearQuery));
     	BasicDBObject unwind = new BasicDBObject("$unwind", "$genres");
@@ -420,7 +420,7 @@ public class Controller {
     	pipeline.add(group);
     	
     	// Build results list
-    	List<Genre> genres = new ArrayList<Genre>();
+    	List<Genre> genres = new ArrayList<>();
     	
     	for (DBObject document : moviesCollection.aggregate(pipeline).results()) {			
 			Genre genre = new Genre(null, (String) document.get("_id"));

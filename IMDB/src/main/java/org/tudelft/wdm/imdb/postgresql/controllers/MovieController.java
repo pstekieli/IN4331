@@ -52,7 +52,7 @@ public class MovieController {
         if (sort == null || !sort.equals("idmovies") || !sort.equals("title") || !sort.equals("year"))
             sort = "idmovies"; /* Enforce a valid option if none is specified or a wrong one is entered */        
         /* ----------------------------------------------------------------- */        
-        String GetAllObjectsQuery = ("SELECT m.idmovies FROM movies m ORDER BY m." + sort + " LIMIT 20 OFFSET " + offset + ";");        
+        String GetAllObjectsQuery = ("SELECT m.idmovies FROM movies m ORDER BY m." + sort + " LIMIT 10 OFFSET " + offset + ";");        
         ArrayList<Long> TemporaryCollection = new ArrayList<>();
         JDBC.PerformQuery(GetAllObjectsQuery);        
         try {                

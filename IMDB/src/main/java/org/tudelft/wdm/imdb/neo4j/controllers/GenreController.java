@@ -26,12 +26,13 @@ public class GenreController {
     public static Genre getGenre(Statement query){
         StatementResult sr = Controller.query(query);
         Controller.closeConnection();
-        while (sr.hasNext()){
+        while (sr.hasNext()){ // Get result data
             Record r = sr.next();
             Genre g = new Genre(
                     r.get("id").asLong(),
                     r.get("name").asString()
             );
+            // Get the individual information required
             for (Movie m : getMoviesInformation(g.getId()))
                 g.AddMovie(m);
             return g;
@@ -50,7 +51,7 @@ public class GenreController {
         StatementResult sr = Controller.query(query);
         Controller.closeConnection();
         ArrayList<Genre> genres = new ArrayList<>();
-        while (sr.hasNext()){
+        while (sr.hasNext()){ // Get result data
             Record r = sr.next();
             Genre g = new Genre(
                     r.get("id").asLong(),
@@ -63,25 +64,31 @@ public class GenreController {
     }
     
     public static ArrayList<Movie> getMoviesInformation(long genreId){
-        Statement s = new Statement("MATCH (m:movies)-[r:MOVIE_GENRE]->(g:genres {idgenres:"
-                + genreId + "}) RETURN m.idmovies, m.title, m.year"
+        Statement s = new Statement(
+                "MATCH (m:movies)-[r:MOVIE_GENRE]->(g:genres {idgenres:"
+                + genreId
+                + "}) RETURN m.idmovies, m.title, m.year"
         );
         StatementResult sr = Controller.query(s);
         Controller.closeConnection();
         ArrayList<Movie> movies = new ArrayList<>();
-        while (sr.hasNext()){
+        while (sr.hasNext()){ // Get result data
             Record r = sr.next();
             Movie m = new Movie(
                     r.get("m.idmovies").asLong(),
                     r.get("m.title").asString(),
+                    // Check for null to avoid errors. If it is null,
+                    // then return 0 to achieve identical output to SQL.
                     r.get("m.year").isNull() ? 0 : r.get("m.year").asInt());
         }
         return movies;
     }
     
     public static int getGenreStatistics(long genreId){
-        Statement s = new Statement("MATCH ()-[r:MOVIE_GENRE]->(g:genres {idgenres:"
-                + genreId + "}) RETURN COUNT(r)"
+        Statement s = new Statement(
+                "MATCH ()-[r:MOVIE_GENRE]->(g:genres {idgenres:"
+                + genreId
+                + "}) RETURN COUNT(r)"
         );
         StatementResult sr = Controller.query(s);
         Controller.closeConnection();
@@ -92,20 +99,31 @@ public class GenreController {
         return 0;
     }
     
+    // Identical to the function above, just with added year/endyear filtering.
     public static int getGenreStatistics(long genreId, String year, String endyear){
         String where = formulateWhere(year, endyear);
-        Statement s = new Statement("MATCH ()-[r:MOVIE_GENRE]->(g:genres {idgenres:"
-                + genreId + "})" + where  + " RETURN COUNT(r)"
+        Statement s = new Statement(
+                "MATCH ()-[r:MOVIE_GENRE]->(g:genres {idgenres:"
+                + genreId + "})"
+                + where 
+                + " RETURN COUNT(r)"
         );
         StatementResult sr = Controller.query(s);
         Controller.closeConnection();
-        while (sr.hasNext()){
+        while (sr.hasNext()){ // Get result data
             Record r = sr.next();
             return r.get("COUNT(r)").asInt();
         }
         return 0;
     }
     
+    /**
+     * Generates a Cypher WHERE string with the given year and endyear
+     * values. The year and endyear are ignored if they are null.
+     * @param year
+     * @param endyear
+     * @return 
+     */
     public static String formulateWhere(String year, String endyear){
         ArrayList<String> where_args = new ArrayList<>();
         if (year!=null) where_args.add("m.year>=" + year);

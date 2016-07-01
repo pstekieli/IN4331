@@ -95,9 +95,9 @@ public class GenreController {
     }     
     public void SetActiveFiltersForSingle (Long offset, Long id, Integer startYear, Integer endYear, String sort, String sort2) {
         /* ---------------------SET DEFAULTS IF NULL------------------------ */
-        Long limit = (long)20;
+        Long limit = 10l;
         if (offset == null)
-            offset = (long)0;
+            offset = 0l;
         if (sort == null || (!sort.equals("idmovies") && !sort.equals("title") && !sort.equals("year")))
             sort = "idmovies";
         if (sort2 == null || (!sort.equals("idmovies") && !sort.equals("title") && !sort.equals("year")))

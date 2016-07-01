@@ -48,7 +48,7 @@ public class Actors {
         String sort_arg;
         if (sort==null) sort_arg = "";
         else {
-            switch (sort.toLowerCase()){
+            switch (sort.toLowerCase()){ //Determine order by string
                 case "fname":
                 case "lname":
                 case "gender": sort_arg = " ORDER BY " + sort; break;
@@ -63,7 +63,7 @@ public class Actors {
         if (fname!=null) where_args.add("a.fname =~ '.*(?i)" + fname + ".*'");
         if (lname!=null) where_args.add("a.lname>=~ '.*(?i)" + lname + ".*'");
         String where = "";
-        if (!where_args.isEmpty()){
+        if (!where_args.isEmpty()){ //Combine WHERE statements into a single string
             where = " WHERE ";
             for (String arg : where_args){
                 where+=arg + " AND ";
@@ -71,10 +71,13 @@ public class Actors {
             where = where.substring(0, where.length()-5) + " ";
         }
         
-        String query = "MATCH (a:actors)" + where
+        // Combine all components into a single query
+        String query = "MATCH (a:actors)"
+                + where
                 + "RETURN a.idactors AS id, a.fname AS fname, a.lname AS lname, a.gender AS gender"
                 + sort_arg
-                + " SKIP " + offset_arg
+                + " SKIP "
+                + offset_arg
                 + " LIMIT 10";
         
         Statement s = new Statement(query);
@@ -86,8 +89,11 @@ public class Actors {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{actorId}")
     public ArrayList<Actor> displayDetailed(@PathParam("actorId") Long id, @QueryParam("orderby") String sort){
-        Statement s = new Statement("MATCH (a:actors {idactors:" + id
-                + "}) RETURN a.idactors AS id, a.fname AS fname, a.lname AS lname, a.gender AS gender");
+        Statement s = new Statement(
+                "MATCH (a:actors {idactors:"
+                + id
+                + "}) RETURN a.idactors AS id, a.fname AS fname, a.lname AS lname, a.gender AS gender"
+        );
         Controller.keepOpen();
         ArrayList<Actor> actor = ActorController.getActorsFull(s);
         Controller.forceClose();
@@ -98,8 +104,11 @@ public class Actors {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{actorId}/movies")
     public ArrayList<Movie> displayMovies(@PathParam("actorId") Long id, @QueryParam("orderby") String sort){
-        Statement s = new Statement("MATCH (a:actors {idactors:" + id
-                + "}) RETURN a.idactors AS id, a.fname AS fname, a.lname AS lname, a.gender AS gender");
+        Statement s = new Statement(
+                "MATCH (a:actors {idactors:"
+                + id
+                + "}) RETURN a.idactors AS id, a.fname AS fname, a.lname AS lname, a.gender AS gender"
+        );
         return ActorController.getMoviesInformation(id, sort);
     }
     
@@ -107,8 +116,11 @@ public class Actors {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{actorId}/statistics")
     public Integer displayStatistics(@PathParam("actorId") Long id){
-        Statement s = new Statement("MATCH (a:actors {idactors:" + id
-                + "}) RETURN a.idactors AS id, a.fname AS fname, a.lname AS lname, a.gender AS gender");
+        Statement s = new Statement(
+                "MATCH (a:actors {idactors:" 
+                + id
+                + "}) RETURN a.idactors AS id, a.fname AS fname, a.lname AS lname, a.gender AS gender"
+        );
         return ActorController.getActorStatistics(id);
     }
 }

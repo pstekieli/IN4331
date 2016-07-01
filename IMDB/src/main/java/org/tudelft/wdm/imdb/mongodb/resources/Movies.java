@@ -37,7 +37,8 @@ public class Movies {
      * returned if no movie titles meet the specified query.
      * 
      * @param title Title or substring of movie title.
-     * @param year Optional filter for a specific year.
+     * @param year Optional filter for starting at a specific year.
+     * @param endYear Optional filter for up to a specific year.
      * @return List of movie details.
      */
     @GET

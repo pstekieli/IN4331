@@ -40,7 +40,7 @@ public class Genres {
         String where = GenreController.formulateWhere(year, endyear);
         String orderby = " ORDER BY id";
         if (sort!=null){
-            switch (sort.toLowerCase()){
+            switch (sort.toLowerCase()){ //Determine order by string
                 case "genre":
                 case "name": orderby = " ORDER BY name"; break;
                 case "idmovies":
@@ -48,7 +48,14 @@ public class Genres {
                 case "number of movies": orderby = " ORDER BY moviecount"; break;
             }
         }
-        Statement s = new Statement("MATCH (m:movies)-[r:MOVIE_GENRE]->(g:genres)" + where + " RETURN g.idgenres AS id, g.genre AS name, COUNT(m.idmovies) AS moviecount" + orderby);
+        
+        // Combine all components into a single query
+        Statement s = new Statement(
+                "MATCH (m:movies)-[r:MOVIE_GENRE]->(g:genres)"
+                + where
+                + " RETURN g.idgenres AS id, g.genre AS name, COUNT(m.idmovies) AS moviecount"
+                + orderby
+        );
         return GenreController.getGenresFull(s);
     }
     
@@ -56,7 +63,9 @@ public class Genres {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{genreId}")
     public Genre displayDetailed(@PathParam("genreId") Long id, @QueryParam("offset") String offset, @QueryParam("limit") String limit, @QueryParam("year") String year, @QueryParam("endyear") String endyear, @QueryParam("orderby1") String order, @QueryParam("orderby2") String order2){
-        Statement s = new Statement("MATCH (g:genres {idgenres:" + id
+        Statement s = new Statement(
+                "MATCH (g:genres {idgenres:"
+                + id
                 + "}) RETURN g.idgenres AS id, g.genre AS name"
         );
         Genre g = GenreController.getGenre(s);
@@ -77,9 +86,10 @@ public class Genres {
             } catch (NumberFormatException ex){}
         }
         
+        //Determine order by string
         String sort_arg;
         if (order==null) sort_arg = " ORDER BY id";
-        else {
+        else { //If orderby1 isn't given we ignore orderby2
             switch (order.toLowerCase()){
                 case "title":
                 case "year": sort_arg = " ORDER BY " + order; break;
@@ -89,7 +99,7 @@ public class Genres {
                 case "language": sort_arg = " ORDER BY m." + order; break;
                 default: sort_arg = " ORDER BY id";
             }
-            if (order2!=null){
+            if (order2!=null){ //If orderby2 is given we add it to the order by string
                 switch (order2.toLowerCase()){
                     case "title":
                     case "year": sort_arg += ", " + order2; break;
@@ -104,11 +114,15 @@ public class Genres {
         
         String where = GenreController.formulateWhere(year, endyear);
         
-        String query = "MATCH (m:movies)-[r:MOVIE_GENRE]->(g:genres {idgenres:" + id
-                + "}) " + where
+        // Combine all components into a single query
+        String query = "MATCH (m:movies)-[r:MOVIE_GENRE]->(g:genres {idgenres:"
+                + id
+                + "}) "
+                + where
                 + "RETURN m.idmovies AS id, m.title AS title, m.year AS year"
                 + sort_arg
-                + " SKIP " + offset_arg
+                + " SKIP "
+                + offset_arg
                 + " LIMIT 10";
         
         Statement s = new Statement(query);

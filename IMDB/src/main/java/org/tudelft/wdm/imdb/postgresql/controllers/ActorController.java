@@ -40,7 +40,7 @@ public class ActorController {
     
     private final ArrayList<String> Queries = new ArrayList<>();
     private final JDBC JDBC = new JDBC();    
-    private final Long limit = Long.parseLong("20");
+    private final Long limit = 10l;
     private Long offset;
     private String sort;    
     

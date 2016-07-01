@@ -49,7 +49,7 @@ public class Actors {
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<Actor> actorsByName(@QueryParam("firstname") String firstName, @QueryParam("lastname") String lastName) {
 		if (firstName == null && lastName == null) {
-			return new ArrayList<Actor>();
+			return new ArrayList<>();
 		}
 		
 		List<Actor> actors = Controller.getActorsByName(firstName, lastName);
@@ -88,7 +88,7 @@ public class Actors {
 	@Path("/stats")
 	public List<Actor> actorByNameStatistics(@QueryParam("firstname") String firstName, @QueryParam("lastname") String lastName) {
 		if (firstName == null && lastName == null) {
-			return new ArrayList<Actor>();
+			return new ArrayList<>();
 		}
 		
 		List<Actor> actors = Controller.getActorsByNameStats(firstName, lastName);
