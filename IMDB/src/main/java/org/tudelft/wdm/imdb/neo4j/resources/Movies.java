@@ -34,13 +34,13 @@ public class Movies {
      * @param offset
      * @param sort
      * @param title
-     * @param syear
-     * @param eyear
+     * @param year
+     * @param endyear
      * @return String that will be returned as a text/plain response.
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public ArrayList<Movie> getAllMovies(@QueryParam("offset") String offset, @QueryParam("orderby") String sort, @QueryParam("title") String title, @QueryParam("syear") String syear, @QueryParam("eyear") String eyear){
+    public ArrayList<Movie> getAllMovies(@QueryParam("offset") String offset, @QueryParam("orderby") String sort, @QueryParam("title") String title, @QueryParam("year") String year, @QueryParam("endyear") String endyear){
         // This function is really susceptible to SQL injection, but I can't
         // figure out just how you're meant to do this stuff safely with the
         // Neo4j driver so considering the assignment doesn't require safety
@@ -69,8 +69,8 @@ public class Movies {
         ArrayList<String> where_args = new ArrayList<>();
         // Regex expression for SQL's "LIKE %str%". (?i) for case insensitive.
         if (title!=null) where_args.add("m.title =~ '.*(?i)" + title + ".*'");
-        if (syear!=null) where_args.add("m.year>=" + syear);
-        if (eyear!=null) where_args.add("m.year<=" + eyear);
+        if (year!=null) where_args.add("m.year>=" + year);
+        if (endyear!=null) where_args.add("m.year<=" + endyear);
         String where = "";
         if (!where_args.isEmpty()){
             where = " WHERE ";

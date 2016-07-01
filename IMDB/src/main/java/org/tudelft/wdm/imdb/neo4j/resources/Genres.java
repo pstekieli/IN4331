@@ -36,7 +36,7 @@ public class Genres {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public ArrayList<Genre> getAllGenres(@QueryParam("sort") String sort, @QueryParam("year") String year, @QueryParam("endyear") String endyear){
+    public ArrayList<Genre> getAllGenres(@QueryParam("orderby") String sort, @QueryParam("year") String year, @QueryParam("endyear") String endyear){
         String where = GenreController.formulateWhere(year, endyear);
         String orderby = " ORDER BY id";
         if (sort!=null){

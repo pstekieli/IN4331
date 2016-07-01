@@ -61,7 +61,7 @@ public class Movies {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public ArrayList<Movie> searchForMovies(@QueryParam("offset") Long offset, @QueryParam("orderby") String sort, @QueryParam("title") String title, @QueryParam("syear") Integer startYear, @QueryParam("eyear") Integer endYear) {         
+    public ArrayList<Movie> searchForMovies(@QueryParam("offset") Long offset, @QueryParam("orderby") String sort, @QueryParam("title") String title, @QueryParam("year") Integer startYear, @QueryParam("endyear") Integer endYear) {         
         MovieController MovieController = new MovieController();        
         /* ---------------------SECURE INPUT-------------------------------- */        
         if (title != null)
